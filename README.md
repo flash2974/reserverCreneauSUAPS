@@ -41,15 +41,15 @@ docker compose up -d
 
 #### Avec Docker (`https`):
 ```bash
-cp example.docker-compose-v2.yml docker-compose-v2.yml
+cp example.docker-compose-v2.yml docker-compose-v2.yml && cp config/example.traefik-config.yml config/traefik-config.yml 
 ```
 ```bash
-touch ~/docker/traefik/acme.json && chmod ~/docker/traefik/acme.json
+mkdir -p ~/docker/traefik/ && touch ~/docker/traefik/acme.json && chmod 600 ~/docker/traefik/acme.json
 ``` 
-- Dans `config/traefik.yml`, remplacer **EMAIL** avec votre **email**
+- Dans `config/traefik-config.yml`, remplacer **EMAIL** avec votre **email**
 - Dans `docker-compose-v2.yml` remplacer **DOMAIN** avec votre nom de **domaine** / **sous domaine**
 ```bash
-docker compose -p reservercreneausuaps --file docker-compose-v2 up -d
+docker compose -p reservercreneausuaps --file docker-compose-v2.yml up -d
 ```
 
 <br>

@@ -16,8 +16,6 @@ services:
     restart: unless-stopped
   traefik:
     image: traefik:latest
-    networks:
-      - proxy
     ports:
       - "80:80"
       - "443:443"
