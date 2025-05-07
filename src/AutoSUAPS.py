@@ -201,7 +201,7 @@ class AutoSUAPS :
             print(df.to_string(index=False))
         
     
-    def reserver_creneau(self, id_creneau: str) -> None:
+    def reserver_creneau(self, id_creneau: str) -> bool :
         '''
         Réserve le créneau spécifié par son id
         '''
@@ -226,11 +226,15 @@ class AutoSUAPS :
                 res = self.poster_requete(creneau_id, activity_id)
                 if res == 201:
                     print(f"Inscription effectuée en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
+                    return True
+                
                 else:
                     print(f"Erreur {res} d'inscription en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
             else:
                 print(f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
             print()
+        
+        return False
 
 
     def poster_requete(self, id_creneau : str, id_activite : str) -> int :

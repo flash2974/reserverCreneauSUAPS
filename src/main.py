@@ -7,9 +7,9 @@ import json
 import os
 import logging
 
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from functools import wraps
 from AutoSUAPS import AutoSUAPS
 from utilities import setAllSchedules, setDefaultSchedules, get_paris_datetime
 
@@ -22,75 +22,64 @@ TOKEN = os.getenv("TOKEN")
 
 # === FLASK APP SETUP ===
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
-
-activities_cache = None
-activities_cache_timestamp = 0
-CACHE_EXPIRATION_TIME = 600  # seconds
-
 auto = AutoSUAPS(USERNAME, PASSWORD)    
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
 
-@app.route('/')
-@login_required
+def token_required(func):
+    @wraps(func)  # Préserve le nom et les métadonnées de la fonction décorée
+    def wrapper_func(*args, **kwargs):
+        token = request.headers.get('Token') 
+        if not token or token != TOKEN:
+            return jsonify({"error": "Unauthorized"}), 401
+        return func(*args, **kwargs)
+    return wrapper_func
+
+@app.route('/api/activities')
+@token_required
 def home():
     activities_dict = get_activities()
     config_file = read_config()
-    
     sports = sorted(list({activity['activity_name'] for activity in activities_dict}))
+    
+    json_to_return = {'activity_dict' : activities_dict, 
+                      'config' : config_file,
+                      'sports' : sports}
+    
+    return jsonify(json_to_return), 200
 
-    return render_template('index.html', activities_dict=activities_dict, config_file=config_file, sports=sports)
 
 
-
-@app.route('/reserver', methods=['POST'])
-@login_required
+@app.route('/api/reserver', methods=['POST'])
+@token_required
 def reserver():
-    activity_id = request.form.get('id_resa')  # Récupère l'ID de l'activité sélectionnée
-    if not activity_id:
-        flash("Aucune activité sélectionnée pour la réservation.", "error")
-        return redirect('/')
+    data : dict = request.get_json()
+    if not (activity_id := data.get('id_creneau_a_resa')):
+        return jsonify({"error": "Pas de data"}), 400
     
     auto.login()
     auto.set_periode(False)
-    auto.reserver_creneau(activity_id)
+    success = auto.reserver_creneau(activity_id)
     auto.logout()
     
-    print(f"Réservation effectuée pour l'activité ID : {activity_id}")
-    flash(f"Réservation effectuée !", "success")
-    return redirect('/')
+    return (jsonify({'message' : f"Réservation effectuée pour l'activité ID : {activity_id}"}), 201) if success else (jsonify({"error": "Erreur inconnue !"}), 400)
 
-@app.route('/update', methods=['POST'])
-@login_required
+@app.route('/api/update', methods=['POST'])
+@token_required
 def update():
-    action = request.form.get('action')
+    data : dict = request.get_json()
     auto.login()
-
+    action = data.get('action')
+    
     if action == 'sauvegarder':
-        selected_ids = request.form.getlist('id_resa')
+        selected_ids : list = data.get('selected_ids')
         save_config({"ids_resa": selected_ids})
         setAllSchedules(auto)
-        flash('Sauvegardé !')
-
+        
     elif action == 'default':
         setDefaultSchedules(auto)
-        flash('Réservations par défaut ok !')
-        
-    elif action.startswith("reserver_"):
-        activity_id = action.split("_")[1]
-        auto.set_periode(False)
-        auto.reserver_creneau(activity_id)
-        flash(f"Réservation effectuée !", "success")
 
     auto.logout()
-    return redirect(url_for('home'))
+    return jsonify({'message' : 'Config ok !'}), 200
 
 # === UTILS ===
 def read_config():
@@ -102,15 +91,9 @@ def save_config(config):
         json.dump(config, f, indent=4)
 
 def get_activities():
-    global activities_cache, activities_cache_timestamp
-    current_time = time.time()
-    if activities_cache is None or (current_time - activities_cache_timestamp) > CACHE_EXPIRATION_TIME:
-        auto.login()
-        df = auto.get_info_activites()
-        activities_cache = df.to_dict(orient='records')
-        activities_cache_timestamp = current_time
-        auto.logout()
-    return activities_cache
+    return auto.get_info_activites().to_dict(orient='records')
+
+
 
 # === SCHEDULER ===
 def scheduler_loop():
