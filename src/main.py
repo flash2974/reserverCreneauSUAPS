@@ -71,7 +71,7 @@ def update():
     action = data.get('action')
     
     if action == 'sauvegarder':
-        selected_ids : list = data.get('selected_ids')
+        selected_ids : list = data.get('ids')
         save_config({"ids_resa": selected_ids})
         setAllSchedules(auto)
         
