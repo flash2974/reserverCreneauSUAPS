@@ -1,9 +1,11 @@
-from utilities import *
-from datetime import datetime, timedelta
-import requests
 import json
-from bs4 import BeautifulSoup
+import requests
 import pandas as pd
+
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+from .utilities import get_paris_datetime, read_id_list
+
 
 class AutoSUAPS :
     def __init__(self, username : str, password : str) -> None :
@@ -148,7 +150,7 @@ class AutoSUAPS :
         return df
         
     
-    def get_schedules(self, delta : int = 2, liste_input: list[str] = readJSON()) -> list[dict]:
+    def get_schedules(self, delta : int = 2, liste_input: list[str] = read_id_list()) -> list[dict]:
         '''
         Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute 2 minutes (delta) pour savoir à quelles heures set les schedules
         '''

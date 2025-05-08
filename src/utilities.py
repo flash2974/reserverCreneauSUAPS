@@ -1,15 +1,22 @@
-# Pas d'import de AutoSUAPS pour éviter un import circulaire
-import schedule
-import datetime
+import os
 import pytz
 import json
-import os
+import schedule
+import datetime
+# Pas d'import de AutoSUAPS pour éviter un import circulaire
 
 BASE_DIR = os.path.dirname(__file__)
 
-def readJSON() :
-    with open(os.path.join(BASE_DIR, '../config/config.json'), 'r') as file :
-        return list(json.load(file)["ids_resa"])
+def read_config():
+    with open(os.path.join(BASE_DIR, '../config/config.json'), 'r') as f:
+        return json.load(f)
+
+def save_config(config):
+    with open(os.path.join(BASE_DIR, '../config/config.json'), 'w') as f:
+        json.dump(config, f, indent=4)
+
+def read_id_list() :
+    return list(read_config()["ids_resa"])
 
 def get_paris_datetime() :
     return datetime.datetime.now(pytz.timezone('Europe/Paris'))
@@ -21,7 +28,7 @@ def actions(auto, id) :
     auto.logout()
     
 
-def setSchedule(id, day, hour, name, auto):
+def set_schedule(id, day, hour, name, auto):
     match day:
         case "lundi":
             job = schedule.every().monday.at(hour, "Europe/Paris").do(actions, auto, id)
@@ -41,13 +48,13 @@ def setSchedule(id, day, hour, name, auto):
     job.note = name
 
 
-def setAllSchedules(auto):
+def set_all_schedules(auto):
     schedule.clear()
     
     if(allSchedules := auto.get_schedules()) is None :
         return
     for creneau in allSchedules :
-        setSchedule(
+        set_schedule(
             id = creneau['id'], 
             day = creneau['day'], 
             hour = creneau['hour'], 
@@ -56,7 +63,7 @@ def setAllSchedules(auto):
         )
 
 
-def setDefaultSchedules(auto) :
+def set_default_schedules(auto) :
     data = {"ids_resa": ["a67c920a-fc66-452c-8d07-5d7206a44f5b", "c12b09b0-8660-4b3c-9711-983317af0441", "eba1eb76-55b8-4ae4-a067-6182f3e6707b"]}
     
     with open(os.path.join(BASE_DIR, '../config/config.json'), 'w') as file :

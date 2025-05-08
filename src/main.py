@@ -1,17 +1,16 @@
+import os
+import pytz
 import time
-import threading
+import logging
 import schedule
 import datetime
-import pytz
-import json
-import os
-import logging
+import threading
 
+from dotenv import load_dotenv
+from .AutoSUAPS import AutoSUAPS
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from dotenv import load_dotenv
-from AutoSUAPS import AutoSUAPS
-from utilities import setAllSchedules, setDefaultSchedules, get_paris_datetime
+from .utilities import set_all_schedules, set_default_schedules, get_paris_datetime, save_config, read_config
 
 # === ENV SETUP ===
 BASE_DIR = os.path.dirname(__file__)
@@ -107,11 +106,11 @@ def update():
     if action == 'sauvegarder':
         selected_ids = request.form.getlist('id_resa')
         save_config({"ids_resa": selected_ids})
-        setAllSchedules(auto)
+        set_all_schedules(auto)
         flash('Sauvegardé !')
 
     elif action == 'default':
-        setDefaultSchedules(auto)
+        set_default_schedules(auto)
         flash('Réservations par défaut ok !')
         
     elif action.startswith("reserver_"):
@@ -124,14 +123,6 @@ def update():
     return redirect(url_for('home'))
 
 # === UTILS ===
-def read_config():
-    with open(os.path.join(BASE_DIR, '../config/config.json'), 'r') as f:
-        return json.load(f)
-
-def save_config(config):
-    with open(os.path.join(BASE_DIR, '../config/config.json'), 'w') as f:
-        json.dump(config, f, indent=4)
-
 def get_activities():
     global activities_cache, activities_cache_timestamp
     current_time = time.time()
@@ -168,14 +159,10 @@ def scheduler_loop():
 
 # === MAIN ENTRY ===
 def main(DEBUG):
-    auto.login()
-    auto.print_ids()
-    auto.logout()
-    setAllSchedules(auto)
+    set_all_schedules(auto)
 
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
-    print("[INFO] Flask UI active sur http://localhost:5000")
     app.run(host="0.0.0.0", port=5000, debug=DEBUG)
 
 if __name__ == '__main__':
