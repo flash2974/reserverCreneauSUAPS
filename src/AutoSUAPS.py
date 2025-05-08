@@ -263,7 +263,7 @@ class AutoSUAPS :
         # Convertir les données en JSON
         post_data_json = json.dumps(post_data)
 
-        rep = self.session.post(postURL, 
+        rep = self.session.post(url = postURL, 
                                 data = post_data_json, 
                                 headers = headers)
 
