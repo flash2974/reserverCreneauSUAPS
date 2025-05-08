@@ -4,5 +4,5 @@ pandas
 python-dotenv
 schedule
 datetime
-Flask
-Flask-Login
+uvicorn
+fastapi[standard]

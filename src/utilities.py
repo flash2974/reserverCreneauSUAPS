@@ -4,6 +4,7 @@ import datetime
 import pytz
 import json
 import os
+import time
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -67,3 +68,36 @@ def setDefaultSchedules(auto) :
     schedule.every().wednesday.at("21:47", "Europe/Paris").do(actions, auto, data["ids_resa"][0])
     schedule.every().thursday.at("19:33", "Europe/Paris").do(actions, auto, data["ids_resa"][1])
     schedule.every().tuesday.at("20:03", "Europe/Paris").do(actions, auto, data["ids_resa"][2])
+    
+
+# === UTILS ===
+def read_config():
+    with open(os.path.join(BASE_DIR, '../config/config.json'), 'r') as f:
+        return json.load(f)
+
+def save_config(config):
+    with open(os.path.join(BASE_DIR, '../config/config.json'), 'w') as f:
+        json.dump(config, f, indent=4)
+
+
+def scheduler_loop():
+    counter = 0
+    old_run = datetime.datetime(1970, 1, 1)
+    
+    while get_paris_datetime().second != 0 :
+        time.sleep(1)
+            
+    while True:
+        schedule.run_pending()
+        
+        if counter % 10 == 0:
+            next_job = schedule.jobs[0]
+            next_run = next_job.next_run
+            
+            if next_run and next_run != old_run:
+                note = getattr(next_job, 'note', '???')
+                print(f"Prochaine exécution : {next_run.astimezone(pytz.timezone('Europe/Paris')).strftime('%d-%m-%Y %H:%M:%S')} ({note})")
+                old_run = next_run
+                
+        time.sleep(60)
+        counter += 1

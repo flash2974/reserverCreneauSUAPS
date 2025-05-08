@@ -1,4 +1,4 @@
-from utilities import *
+from .utilities import *
 from datetime import datetime, timedelta
 import requests
 import json
