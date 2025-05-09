@@ -88,10 +88,9 @@ def reserver():
         flash("Aucune activité sélectionnée pour la réservation.", "error")
         return redirect('/')
     
-    auto.login()
-    auto.set_periode(False)
-    auto.reserver_creneau(activity_id)
-    auto.logout()
+    with auto :
+        auto.set_periode(False)
+        auto.reserver_creneau(activity_id)
     
     print(f"Réservation effectuée pour l'activité ID : {activity_id}")
     flash(f"Réservation effectuée !", "success")
@@ -101,25 +100,25 @@ def reserver():
 @login_required
 def update():
     action = request.form.get('action')
-    auto.login()
+    
+    with auto :
 
-    if action == 'sauvegarder':
-        selected_ids = request.form.getlist('id_resa')
-        save_config({"ids_resa": selected_ids})
-        set_all_schedules(auto)
-        flash('Sauvegardé !')
+        if action == 'sauvegarder':
+            selected_ids = request.form.getlist('id_resa')
+            save_config({"ids_resa": selected_ids})
+            set_all_schedules(auto)
+            flash('Sauvegardé !')
 
-    elif action == 'default':
-        set_default_schedules(auto)
-        flash('Réservations par défaut ok !')
-        
-    elif action.startswith("reserver_"):
-        activity_id = action.split("_")[1]
-        auto.set_periode(False)
-        auto.reserver_creneau(activity_id)
-        flash(f"Réservation effectuée !", "success")
+        elif action == 'default':
+            set_default_schedules(auto)
+            flash('Réservations par défaut ok !')
+            
+        elif action.startswith("reserver_"):
+            activity_id = action.split("_")[1]
+            auto.set_periode(False)
+            auto.reserver_creneau(activity_id)
+            flash(f"Réservation effectuée !", "success")
 
-    auto.logout()
     return redirect(url_for('home'))
 
 # === UTILS ===
@@ -127,11 +126,10 @@ def get_activities():
     global activities_cache, activities_cache_timestamp
     current_time = time.time()
     if activities_cache is None or (current_time - activities_cache_timestamp) > CACHE_EXPIRATION_TIME:
-        auto.login()
-        df = auto.get_info_activites()
-        activities_cache = df.to_dict(orient='records')
-        activities_cache_timestamp = current_time
-        auto.logout()
+        with auto :
+            df = auto.get_info_activites()
+            activities_cache = df.to_dict(orient='records')
+            activities_cache_timestamp = current_time
     return activities_cache
 
 # === SCHEDULER ===
@@ -159,7 +157,8 @@ def scheduler_loop():
 
 # === MAIN ENTRY ===
 def main(DEBUG):
-    set_all_schedules(auto)
+    with auto :
+        set_all_schedules(auto)
 
     threading.Thread(target=scheduler_loop, daemon=True).start()
 

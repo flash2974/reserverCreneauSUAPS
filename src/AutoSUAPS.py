@@ -274,3 +274,12 @@ class AutoSUAPS :
         Ferme la session HTTP et donc déconnecte l'utilisateur
         '''
         self.session.close()
+        
+        
+    def __enter__(self):
+        self.login()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.logout()
+        return False
