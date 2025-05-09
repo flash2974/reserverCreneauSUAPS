@@ -42,8 +42,8 @@ def home(token = Depends(verify_token)):
     sports = sorted(list({activity['activity_name'] for activity in activities_dict}))
     
     return {'activity_dict' : activities_dict, 
-                      'config' : config_file,
-                      'sports' : sports}
+            'config' : config_file,
+            'sports' : sports}
 
 
 class CreneauResa(BaseModel):
