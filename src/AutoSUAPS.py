@@ -4,7 +4,7 @@ import pandas as pd
 
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from .utilities import get_paris_datetime, read_id_list
+from utilities import get_paris_datetime, read_id_list
 
 
 class AutoSUAPS :

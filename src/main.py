@@ -7,10 +7,10 @@ import datetime
 import threading
 
 from dotenv import load_dotenv
-from .AutoSUAPS import AutoSUAPS
+from AutoSUAPS import AutoSUAPS
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from .utilities import set_all_schedules, set_default_schedules, get_paris_datetime, save_config, read_config
+from utilities import set_all_schedules, set_default_schedules, get_paris_datetime, save_config, read_config
 
 # === ENV SETUP ===
 BASE_DIR = os.path.dirname(__file__)
