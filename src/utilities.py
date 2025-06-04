@@ -23,9 +23,8 @@ def get_paris_datetime() :
 
 
 def actions(auto, id) :
-    auto.login()
-    auto.reserver_creneau(id)
-    auto.logout()
+    with auto :
+        auto.reserver_creneau(id)
     
 
 def set_schedule(id, day, hour, name, auto):

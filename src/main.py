@@ -144,7 +144,7 @@ def scheduler_loop():
         schedule.run_pending()
         
         if counter % 10 == 0:
-            next_job = schedule.jobs[0]
+            next_job = min(schedule.jobs, key=lambda job: job.next_run)
             next_run = next_job.next_run
             
             if next_run and next_run != old_run:

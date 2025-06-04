@@ -86,17 +86,16 @@ class AutoSUAPS :
                 endDate = endDate.replace(tzinfo=todayDate.tzinfo)
                 dates[id] = [startDate, endDate]
             
-            closest_key = list(dates.keys())[0]
+            closest_key = list(dates.keys())[-1]
             
             # Pour savoir la tranche de dates la plus rapprochée de la date actuelle
-            for key, slice_date in dates.items() :
+            for key, slice_date in reversed(dates.items()) :
                 if (slice_date[0] <= todayDate <= slice_date[1] and
                 dates[closest_key][0] < slice_date[0] and
                 dates[closest_key][1] > slice_date[1]) :
                     closest_key = key
             
             self.id_periode = closest_key
-        
                     
     def get_activites(self) -> list[str] :
         '''
@@ -192,15 +191,15 @@ class AutoSUAPS :
                 
         return res
         
-    def print_ids(self) -> None :
+    def __str__(self) -> None :
         '''
         Affiche le tableaux des activités disponibles, avec quelques informations
         '''
         if(df := self.get_info_activites()).empty :
-            print("Aucune activité disponible.")
+            return "Aucune activité disponible."
         else :
             df = df.drop(["activity_id"], axis=1)
-            print(df.to_string(index=False))
+            return df.to_string(index=False)
         
     
     def reserver_creneau(self, id_creneau: str) -> None:
