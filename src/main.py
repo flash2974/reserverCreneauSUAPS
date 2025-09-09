@@ -1,10 +1,10 @@
 import os
 import pytz
 import time
-import logging
 import schedule
 import datetime
 import threading
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from dotenv import load_dotenv
 from AutoSUAPS import AutoSUAPS
@@ -18,10 +18,13 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, '../config/.env'), override=True)
 USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 TOKEN = os.getenv("TOKEN")
+DEBUG = os.getenv("DEBUG") == "True"
 
 # === FLASK APP SETUP ===
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -93,7 +96,7 @@ def reserver():
         auto.reserver_creneau(activity_id)
     
     print(f"Réservation effectuée pour l'activité ID : {activity_id}")
-    flash(f"Réservation effectuée !", "success")
+    flash("Réservation effectuée !", "success")
     return redirect('/')
 
 @app.route('/update', methods=['POST'])
@@ -117,7 +120,7 @@ def update():
             activity_id = action.split("_")[1]
             auto.set_periode(False)
             auto.reserver_creneau(activity_id)
-            flash(f"Réservation effectuée !", "success")
+            flash("Réservation effectuée !", "success")
 
     return redirect(url_for('home'))
 
@@ -156,7 +159,7 @@ def scheduler_loop():
         counter += 1
 
 # === MAIN ENTRY ===
-def main(DEBUG):
+def main():
     with auto :
         set_all_schedules(auto)
 
@@ -165,8 +168,4 @@ def main(DEBUG):
     app.run(host="0.0.0.0", port=5000, debug=DEBUG)
 
 if __name__ == '__main__':
-    DEBUG = False
-    if not DEBUG :
-        logging.getLogger('werkzeug').setLevel(logging.CRITICAL) # pas de pollution (GET 304 machin)
-        
-    main(DEBUG)
+    main()
