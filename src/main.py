@@ -159,13 +159,12 @@ def scheduler_loop():
         counter += 1
 
 # === MAIN ENTRY ===
-def main():
-    with auto :
+def start_scheduler():
+    with auto:
         set_all_schedules(auto)
-
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
-    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
+start_scheduler()
 
 if __name__ == '__main__':
-    main()
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
