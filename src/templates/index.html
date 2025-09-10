@@ -15,12 +15,11 @@
             <form action="/update" method="POST">
                 {% if activities_dict|length == 0 %}
                 <img src="https://cdn3.emoji.gg/emojis/93363-shockedcat.png">
-                <label>ok1 kréno (sussy baka)</label>
+                <label>pas de kréno (sussy baka)</label>
                 {% else %}
 
                 <div id="top-buttons" style="display: flex; flex-wrap: wrap; gap: 20px;">
                     <button type="submit" name="action" value="sauvegarder">Sauvegarder</button>
-                    <button type="submit" name="action" value="default">Default</button>
                 </div>
                 {% if sports|length > 1 %}
                 <section id="filters" style="margin: 40px;">
