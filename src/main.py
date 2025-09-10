@@ -154,10 +154,9 @@ def scheduler_loop():
         schedule.run_pending()
         
         if counter % 10 == 0:
-            next_job = min(schedule.jobs, key=lambda job: job.next_run)
-            next_run = next_job.next_run
-            
-            if next_run and next_run != old_run:
+            next_job = min(schedule.jobs, key=lambda job: job.next_run, default=None)
+           
+            if next_job and (next_run := next_job.next_run) != old_run:
                 note = getattr(next_job, 'note', '???')
                 print(f"Prochaine exécution : {next_run.astimezone(pytz.timezone('Europe/Paris')).strftime('%d-%m-%Y %H:%M:%S')} ({note})")
                 old_run = next_run
