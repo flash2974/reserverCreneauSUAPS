@@ -3,16 +3,15 @@ import pytz
 import json
 import schedule
 import datetime
-# Pas d'import de AutoSUAPS pour éviter un import circulaire
 
-BASE_DIR = os.path.dirname(__file__)
+JSON_FILE = os.path.join(os.path.dirname(__file__), '../config/config.json')
 
 def read_config():
-    with open(os.path.join(BASE_DIR, '../config/config.json'), 'r') as f:
+    with open(JSON_FILE, 'r') as f:
         return json.load(f)
 
 def save_config(config):
-    with open(os.path.join(BASE_DIR, '../config/config.json'), 'w') as f:
+    with open(JSON_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
 def read_id_list() :
@@ -65,7 +64,7 @@ def set_all_schedules(auto):
 def set_default_schedules(auto) :
     data = {"ids_resa": ["a67c920a-fc66-452c-8d07-5d7206a44f5b", "c12b09b0-8660-4b3c-9711-983317af0441", "eba1eb76-55b8-4ae4-a067-6182f3e6707b"]}
     
-    with open(os.path.join(BASE_DIR, '../config/config.json'), 'w') as file :
+    with open(JSON_FILE, 'w') as file :
         json.dump(data, file, indent=4)
         
     schedule.clear()

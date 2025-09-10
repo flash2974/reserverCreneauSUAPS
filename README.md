@@ -31,9 +31,9 @@ Le code a bien évolué et il n'y a plus que peu de choses à faire à la main. 
     mv config/.example.env config/.env && mv config/example.config.json config/config.json
     ```
 
-2. Ouvrir le fichier `.env` et remplir les champs **USERNAME** et **PASSWORD**
+2. Ouvrir le fichier `.env` et remplir les champs **USERNAME** et **PASSWORD** + mettre DEBUG à True ou False
     ```bash
-    echo -e "USERNAME=username\nPASSWORD=mdp" > config/.env
+    nano config/.env
     ```
 
 3. Lancer le programme avec Docker :

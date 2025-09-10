@@ -1,16 +1,23 @@
-import os
-import pytz
-import time
-import logging
-import schedule
 import datetime
+import os
 import threading
+import time
 
+import pytz
+import schedule
 from dotenv import load_dotenv
-from AutoSUAPS import AutoSUAPS
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from utilities import set_all_schedules, set_default_schedules, get_paris_datetime, save_config, read_config
+from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+from src.AutoSUAPS import AutoSUAPS
+from src.utilities import (
+    get_paris_datetime,
+    read_config,
+    save_config,
+    set_all_schedules,
+    set_default_schedules,
+)
 
 # === ENV SETUP ===
 BASE_DIR = os.path.dirname(__file__)
@@ -18,10 +25,13 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, '../config/.env'), override=True)
 USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 TOKEN = os.getenv("TOKEN")
+DEBUG = os.getenv("DEBUG") == "True"
 
 # === FLASK APP SETUP ===
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -93,7 +103,7 @@ def reserver():
         auto.reserver_creneau(activity_id)
     
     print(f"Réservation effectuée pour l'activité ID : {activity_id}")
-    flash(f"Réservation effectuée !", "success")
+    flash("Réservation effectuée !", "success")
     return redirect('/')
 
 @app.route('/update', methods=['POST'])
@@ -117,7 +127,7 @@ def update():
             activity_id = action.split("_")[1]
             auto.set_periode(False)
             auto.reserver_creneau(activity_id)
-            flash(f"Réservation effectuée !", "success")
+            flash("Réservation effectuée !", "success")
 
     return redirect(url_for('home'))
 
@@ -156,17 +166,12 @@ def scheduler_loop():
         counter += 1
 
 # === MAIN ENTRY ===
-def main(DEBUG):
-    with auto :
+def start_scheduler():
+    with auto:
         set_all_schedules(auto)
-
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
-    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
+start_scheduler()
 
 if __name__ == '__main__':
-    DEBUG = False
-    if not DEBUG :
-        logging.getLogger('werkzeug').setLevel(logging.CRITICAL) # pas de pollution (GET 304 machin)
-        
-    main(DEBUG)
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
