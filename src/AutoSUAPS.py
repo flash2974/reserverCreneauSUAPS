@@ -58,44 +58,26 @@ class AutoSUAPS :
                 return creneau
         return None
 
-    def set_periode(self, weekDelta = True) -> str :
+    def set_periode(self) -> str:
         '''
-        Fait une requête pour savoir quel catalogue utiliser, selon la date actuelle. 
+        Fait une requête pour savoir quel catalogue utiliser, selon la date actuelle.
         Soit le catalogue régulier, soit les différents catalogues selon les dates de vacances.
         '''
         rep = self.session.get('https://u-sport.univ-nantes.fr/api/extended/periodes/catalogue?idCatalogue=')
-        
-        if not isinstance(rep.json(), list) :
-            self.id_periode = rep.json()['id']
-
-        else :
+        data = rep.json()
+    
+        if not isinstance(data, list):
+            self.id_periode = data['id']
+        else:
             todayDate = get_paris_datetime()
-            dates = {}
-            for periode in rep.json() :
-                id = periode['id']
-                
-                startDate = datetime.strptime(periode['dateDebutActivites'], '%Y-%m-%d')
-                endDate = datetime.strptime(periode['dateFinActivites'], '%Y-%m-%d')
-                
-                # On enlève 1 semaine car on fait la réservation 1 semaine en avance
-                if weekDelta :
-                    startDate -= timedelta(days=7)
-                    endDate -= timedelta(days=7)
-                
-                startDate = startDate.replace(tzinfo=todayDate.tzinfo)
-                endDate = endDate.replace(tzinfo=todayDate.tzinfo)
-                dates[id] = [startDate, endDate]
-            
-            closest_key = list(dates.keys())[-1]
-            
-            # Pour savoir la tranche de dates la plus rapprochée de la date actuelle
-            for key, slice_date in reversed(dates.items()) :
-                if (slice_date[0] <= todayDate <= slice_date[1] and
-                dates[closest_key][0] < slice_date[0] and
-                dates[closest_key][1] > slice_date[1]) :
-                    closest_key = key
-            
-            self.id_periode = closest_key
+            for periode in data:
+                startDate = datetime.strptime(periode['dateDebutInscriptions'], '%Y-%m-%d').replace(tzinfo=todayDate.tzinfo)
+                endDate = datetime.strptime(periode['dateFinInscriptions'], '%Y-%m-%d').replace(tzinfo=todayDate.tzinfo)
+                if startDate <= todayDate <= endDate:
+                    self.id_periode = periode['id']
+                    break
+            else:
+                self.id_periode = data[0]['id']
                     
     def get_activites(self) -> list[str] :
         '''

@@ -99,7 +99,7 @@ def reserver():
         return redirect('/')
     
     with auto :
-        auto.set_periode(False)
+        auto.set_periode()
         auto.reserver_creneau(activity_id)
     
     print(f"Réservation effectuée pour l'activité ID : {activity_id}")
@@ -125,7 +125,7 @@ def update():
             
         elif action.startswith("reserver_"):
             activity_id = action.split("_")[1]
-            auto.set_periode(False)
+            auto.set_periode()
             auto.reserver_creneau(activity_id)
             flash("Réservation effectuée !", "success")
 
