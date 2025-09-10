@@ -38,10 +38,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-activities_cache = None
-activities_cache_timestamp = 0
-CACHE_EXPIRATION_TIME = 600  # seconds
-
 auto = AutoSUAPS(USERNAME, PASSWORD)    
 
 # === FLASK AUTH ===
@@ -95,6 +91,7 @@ def logout():
 @login_required
 def home():
     activities_dict = get_activities()
+    print(activities_dict)
     config_file = read_config()
     
     sports = sorted(list({activity['activity_name'] for activity in activities_dict}))
@@ -117,7 +114,7 @@ def reserver():
     
     print(f"Réservation effectuée pour l'activité ID : {activity_id}")
     flash("Réservation effectuée !", "success")
-    return redirect('/')
+    return url_for('home')
 
 @app.route('/update', methods=['POST'])
 @login_required
@@ -125,16 +122,11 @@ def update():
     action = request.form.get('action')
     
     with auto :
-
         if action == 'sauvegarder':
             selected_ids = request.form.getlist('id_resa')
             save_config({"ids_resa": selected_ids})
             set_all_schedules(auto)
             flash('Sauvegardé !')
-
-        elif action == 'default':
-            set_default_schedules(auto)
-            flash('Réservations par défaut ok !')
             
         elif action.startswith("reserver_"):
             activity_id = action.split("_")[1]
@@ -146,14 +138,9 @@ def update():
 
 # === UTILS ===
 def get_activities():
-    global activities_cache, activities_cache_timestamp
-    current_time = time.time()
-    if activities_cache is None or (current_time - activities_cache_timestamp) > CACHE_EXPIRATION_TIME:
-        with auto :
-            df = auto.get_info_activites()
-            activities_cache = df.to_dict(orient='records')
-            activities_cache_timestamp = current_time
-    return activities_cache
+    with auto :
+        df = auto.get_info_activites()
+        return df.to_dict(orient='records')
 
 # === SCHEDULER ===
 def scheduler_loop():
