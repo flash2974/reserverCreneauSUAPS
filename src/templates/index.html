@@ -13,6 +13,11 @@
     <main>
         <section>
             <form action="/update" method="POST">
+                {% if activities_dict|length == 0 %}
+                <img src="https://cdn3.emoji.gg/emojis/93363-shockedcat.png">
+                <label>ok1 kréno (sussy baka)</label>
+                {% else %}
+
                 <div id="top-buttons" style="display: flex; flex-wrap: wrap; gap: 20px;">
                     <button type="submit" name="action" value="sauvegarder">Sauvegarder</button>
                     <button type="submit" name="action" value="default">Default</button>
@@ -32,6 +37,7 @@
                 {% else %}
                     <div style="height: 20px;"></div>
                 {% endif %}
+
                 <table>
                     <thead>
                         <tr>
@@ -70,6 +76,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </form>
         </section>
         {% with messages = get_flashed_messages(with_categories=true) %}
