@@ -15,8 +15,7 @@ from src.utilities import (
     get_paris_datetime,
     read_config,
     save_config,
-    set_all_schedules,
-    set_default_schedules,
+    set_all_schedules
 )
 
 # === ENV SETUP ===
@@ -91,7 +90,6 @@ def logout():
 @login_required
 def home():
     activities_dict = get_activities()
-    print(activities_dict)
     config_file = read_config()
     
     sports = sorted(list({activity['activity_name'] for activity in activities_dict}))

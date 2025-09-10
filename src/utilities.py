@@ -59,16 +59,3 @@ def set_all_schedules(auto):
             name = creneau['name'],
             auto = auto
         )
-
-
-def set_default_schedules(auto) :
-    data = {"ids_resa": ["a67c920a-fc66-452c-8d07-5d7206a44f5b", "c12b09b0-8660-4b3c-9711-983317af0441", "eba1eb76-55b8-4ae4-a067-6182f3e6707b"]}
-    
-    with open(JSON_FILE, 'w') as file :
-        json.dump(data, file, indent=4)
-        
-    schedule.clear()
-    
-    schedule.every().wednesday.at("21:47", "Europe/Paris").do(actions, auto, data["ids_resa"][0])
-    schedule.every().thursday.at("19:33", "Europe/Paris").do(actions, auto, data["ids_resa"][1])
-    schedule.every().tuesday.at("20:03", "Europe/Paris").do(actions, auto, data["ids_resa"][2])
