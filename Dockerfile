@@ -1,11 +1,12 @@
 FROM python:3.12-slim
-RUN pip install --upgrade pip
+RUN pip install uv
 
+COPY config/requirements.txt .
+
+RUN uv pip install --system -r requirements.txt
+
+COPY . /app
 WORKDIR /app
-
-COPY . .
-
-RUN pip install --no-cache-dir -r config/requirements.txt
 
 EXPOSE 5000
 

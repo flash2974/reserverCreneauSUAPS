@@ -1,16 +1,23 @@
-import os
-import pytz
-import time
-import schedule
 import datetime
+import os
 import threading
+import time
+
+import pytz
+import schedule
+from dotenv import load_dotenv
+from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from dotenv import load_dotenv
-from AutoSUAPS import AutoSUAPS
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from utilities import set_all_schedules, set_default_schedules, get_paris_datetime, save_config, read_config
+from src.AutoSUAPS import AutoSUAPS
+from src.utilities import (
+    get_paris_datetime,
+    read_config,
+    save_config,
+    set_all_schedules,
+    set_default_schedules,
+)
 
 # === ENV SETUP ===
 BASE_DIR = os.path.dirname(__file__)

@@ -1,17 +1,17 @@
 
-# reverse proxy
+# Configu du reverse proxy
 <VirtualHost *:443>
+    ServerName flash2974.duckdns.org
+    ServerAlias *.flash2974.duckdns.org
+    ServerAdmin nathan_domenichini@yahoo.com
+
     SSLEngine on
-    # SSLCertificateFile /etc/letsencrypt/live/flash2974.hopto.org/fullchain.pem
-    # SSLCertificateKeyFile /etc/letsencrypt/live/flash2974.hopto.org/privkey.pem
+    SSLCertificateFile /etc/letsencrypt/live/flash2974.duckdns.org/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/flash2974.duckdns.org/privkey.pem
 
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "DENY"
     Header always set X-XSS-Protection "1; mode=block"
-
-    ServerName flash2974.hopto.org
-    ServerAlias *.flash2974.hopto.org
-    ServerAdmin nathan_domenichini@yahoo.com
 
     ProxyPreserveHost On
     ProxyPass /suaps http://localhost:5000/
