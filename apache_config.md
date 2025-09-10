@@ -1,5 +1,6 @@
 
-# Configu du reverse proxy
+# Config du reverse proxy
+```
 <VirtualHost *:443>
     ServerName flash2974.duckdns.org
     ServerAlias *.flash2974.duckdns.org
@@ -20,3 +21,4 @@
     ErrorLog ${APACHE_LOG_DIR}/flash2974_error.log
     CustomLog ${APACHE_LOG_DIR}/flash2974_access.log combined
 </VirtualHost>
+```
