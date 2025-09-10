@@ -54,6 +54,17 @@ class User(UserMixin):
 def load_user(user_id):
     return User(user_id)
 
+
+@app.route("/debug_env")
+def debug_env():
+    print(dict(request.headers))
+    return {
+        "remote_addr": request.remote_addr,
+        "scheme": request.scheme,
+        "is_secure": request.is_secure,
+        "headers": dict(request.headers)
+    }
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET' and request.args.get('token') == TOKEN:
