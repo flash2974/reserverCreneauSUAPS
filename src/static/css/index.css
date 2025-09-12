@@ -402,3 +402,26 @@ body {
     border-width: 0 0.15em 0.15em 0;
     transform: rotate(45deg);
 }
+
+
+.popup {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+.popup-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 500px; /* ← ici tu gères la taille */
+  border-radius: 8px;
+}
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+

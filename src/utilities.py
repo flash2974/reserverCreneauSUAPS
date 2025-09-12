@@ -49,8 +49,11 @@ def set_schedule(id, day, hour, name, auto):
 def set_all_schedules(auto):
     schedule.clear()
     
-    if(allSchedules := auto.get_schedules()) is None :
+    allSchedules = auto.get_schedules()
+    
+    if allSchedules is None :
         return
+    
     for creneau in allSchedules :
         set_schedule(
             id = creneau['id'], 

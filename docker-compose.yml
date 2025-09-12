@@ -4,7 +4,8 @@ services:
       context: .
     volumes:
       - ./config/config.json:/app/config/config.json
-      - ./config/.env:/app/config/.env
+    env_file:
+      - ./config/.env
     ports:
       - 5000:5000
     restart: unless-stopped

@@ -1,10 +1,14 @@
 import os
 import json
+import pytz
 import requests
 import pandas as pd
 
 from bs4 import BeautifulSoup
+from random import randint
 from datetime import datetime, timedelta
+
+import schedule
 from src.utilities import get_paris_datetime, read_id_list
 
 ##### NTFY #####
@@ -13,11 +17,9 @@ if topic := os.getenv("NTFY_TOPIC") :
     from python_ntfy import NtfyClient
     ntfy_client = NtfyClient(topic=topic)
     
-
-def notify(message) :
-    if ntfy_client :
+def notify(message):
+    if ntfy_client:
         ntfy_client.send(message)
-    print(message)
 
 
 class AutoSUAPS :
@@ -123,6 +125,9 @@ class AutoSUAPS :
                     creneau_horaire = activity['horaireDebut'] + ' - ' + activity['horaireFin']
                     lieu = activity['localisation']['nom']
                     id = activity['id']
+                        
+                    if len(activity_name) > 20 :
+                        activity_name = "".join([word[0] for word in activity_name.split('-')[1].split()])
                     
                     activities_list.append({
                         'activity_name': activity_name,
@@ -144,10 +149,11 @@ class AutoSUAPS :
         return df
         
     
-    def get_schedules(self, delta : int = 2, liste_input: list[str] = read_id_list()) -> list[dict]:
+    def get_schedules(self) -> list[dict]:
         '''
-        Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute 2 minutes (delta) pour savoir à quelles heures set les schedules
+        Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute un delta random pour savoir à quelles heures set les schedules
         '''
+        liste_input = read_id_list()
         if (df := self.get_info_activites()).empty :
             return None
         
@@ -161,8 +167,8 @@ class AutoSUAPS :
             
             end_time = datetime.strptime(row['creneau_horaire'].split(' - ')[1], "%H:%M")
 
-            end_time_plus_delta = end_time + timedelta(minutes=delta)
-            hour = end_time_plus_delta.strftime("%H:%M")
+            end_time_plus_delta = end_time + timedelta(seconds=randint(60, 180))
+            hour = end_time_plus_delta.strftime("%H:%M:%S")
             
             res.append({"id": id, "day" : day, "hour" : hour, "name" : name})
         
@@ -202,8 +208,7 @@ class AutoSUAPS :
         Réserve le créneau spécifié par son id
         '''
         df = self.get_info_activites()
-
-        print(get_paris_datetime().strftime("%d-%m-%Y %H:%M:%S"), end=' --> ')
+        message = ""
 
         try:
             row = df.loc[df['id'] == id_creneau].iloc[0]
@@ -212,18 +217,25 @@ class AutoSUAPS :
             places_restantes = row['places_restantes']
             
         except Exception as e:
-            notify(f"Erreur inconnue : {e}")
+            message = f"Erreur inconnue : {e}"
 
         else :
             if places_restantes > 0:
                 res = self.poster_requete(creneau_id, activity_id)
                 if res == 201:
-                    notify(f"Inscription effectuée en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
+                    message = f"Inscription effectuée en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}"
                 else:
-                    notify(f"Erreur {res} d'inscription en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
+                    message = f"Erreur {res} d'inscription en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}"
             else:
-                notify(f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
-            print()
+                message = f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}"
+            
+            next_job = min(schedule.jobs, key=lambda job: job.next_run, default=None)
+            if next_job and (next_run := next_job.next_run) :
+                note = getattr(next_job, 'note', '???')
+                message += f"\nProchaine exécution : {next_run.astimezone(pytz.timezone('Europe/Paris')).strftime('%d-%m-%Y %H:%M:%S')} ({note})"
+            
+            notify(message)
+    
 
 
     def poster_requete(self, id_creneau : str, id_activite : str) -> int :

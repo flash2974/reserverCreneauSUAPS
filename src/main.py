@@ -1,7 +1,5 @@
-import datetime
 import os
 import threading
-import time
 
 import pytz
 import schedule
@@ -12,7 +10,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from src.AutoSUAPS import AutoSUAPS
 from src.utilities import (
-    get_paris_datetime,
     read_config,
     save_config,
     set_all_schedules
@@ -52,16 +49,6 @@ def load_user(user_id):
     return User(user_id)
 
 
-@app.route("/debug_env")
-def debug_env():
-    print(dict(request.headers))
-    return {
-        "remote_addr": request.remote_addr,
-        "scheme": request.scheme,
-        "is_secure": request.is_secure,
-        "headers": dict(request.headers)
-    }
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET' and request.args.get('token') == TOKEN:
@@ -87,20 +74,23 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/test')
+@login_required
 def test():
+    topic = os.getenv("NTFY_TOPIC")
     from python_ntfy import NtfyClient
-    NtfyClient(os.getenv("NTFY_TOPIC")).send("Hello World!")
-    return "message sent !"
+    NtfyClient(topic).send("Hello World!")
+    return f"message sent on topic {topic}!"
+    
 
 @app.route('/')
 @login_required
 def home():
     activities_dict = get_activities()
     config_file = read_config()
-    
+    jobs = [(job.next_run.astimezone(pytz.timezone('Europe/Paris')).strftime('%d-%m-%Y %H:%M:%S'), job.note) for job in schedule.jobs]
     sports = sorted(list({activity['activity_name'] for activity in activities_dict}))
 
-    return render_template('index.html', activities_dict=activities_dict, config_file=config_file, sports=sports)
+    return render_template('index.html', activities_dict=activities_dict, config_file=config_file, sports=sports, jobs=jobs)
 
 
 
@@ -147,26 +137,9 @@ def get_activities():
         return df.to_dict(orient='records')
 
 # === SCHEDULER ===
-def scheduler_loop():
-    counter = 0
-    old_run = datetime.datetime(1970, 1, 1)
-    
-    while get_paris_datetime().second != 0 :
-        time.sleep(1)
-            
+def scheduler_loop():      
     while True:
         schedule.run_pending()
-        
-        if counter % 10 == 0:
-            next_job = min(schedule.jobs, key=lambda job: job.next_run, default=None)
-           
-            if next_job and (next_run := next_job.next_run) != old_run:
-                note = getattr(next_job, 'note', '???')
-                print(f"Prochaine exécution : {next_run.astimezone(pytz.timezone('Europe/Paris')).strftime('%d-%m-%Y %H:%M:%S')} ({note})")
-                old_run = next_run
-                
-        time.sleep(60)
-        counter += 1
 
 # === MAIN ENTRY ===
 def start_scheduler():

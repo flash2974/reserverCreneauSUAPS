@@ -21,6 +21,17 @@
 
                 <div id="top-buttons" style="display: flex; flex-wrap: wrap; gap: 20px;">
                     <button type="submit" name="action" value="sauvegarder">Sauvegarder</button>
+                    <button type="button" onclick="openPopup()">Prochains jobs</button>
+                </div>
+                <div id="popup" class="popup">
+                    <div class="popup-content">
+                        <span class="close" onclick="closePopup()">&times;</span>
+                        <p>
+                            {% for job in jobs %}
+                                {{job[0]}} - {{job[1]}}<br>
+                            {% endfor %}
+                        </p>
+                    </div>
                 </div>
                 {% if sports|length > 1 %}
                 <section id="filters" style="margin: 40px;">
@@ -61,16 +72,17 @@
                             </td>
                             <td>
                                 {{activity['activity_name']}}
-                                {% if activity['resa_a_venir'] %}
-                                    <span style="color: green; font-weight: bold;">(Inscrit)</span>
-                                {% endif %}
                             </td>
                             <td>{{activity['jour']}}</td>
                             <td>{{activity['creneau_horaire']}}</td>
                             <td>{{activity['lieu']}}</td>
                             <td>{{activity['places_restantes']}}</td>
                             <td>
-                                <button class="resa_button" type="submit" name="action" value="reserver_{{ activity['id'] }}">Réserver</button>
+                                {% if activity['resa_a_venir'] %}
+                                    <span style="color: green; font-weight: bold;">Déjà inscrit</span>
+                                {% else %}
+                                    <button class="resa_button" type="submit" name="action" value="reserver_{{ activity['id'] }}">Réserver</button>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -157,7 +169,13 @@
                 console.log(checkCreneau);
             });
         });
-        
+
+    function openPopup() {
+        document.getElementById("popup").style.display = "block";
+    }
+    function closePopup() {
+        document.getElementById("popup").style.display = "none";
+    }
     </script>
     
 </body>
