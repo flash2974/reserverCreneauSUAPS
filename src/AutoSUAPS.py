@@ -1,20 +1,20 @@
-import os
 import json
+import os
+from datetime import datetime, timedelta
+from random import randint
+
+import pandas as pd
 import pytz
 import requests
-import pandas as pd
-
-from bs4 import BeautifulSoup
-from random import randint
-from datetime import datetime, timedelta
-
 import schedule
+from bs4 import BeautifulSoup
+from python_ntfy import NtfyClient
+
 from src.utilities import get_paris_datetime, read_id_list
 
 ##### NTFY #####
 ntfy_client = None
 if topic := os.getenv("NTFY_TOPIC") :
-    from python_ntfy import NtfyClient
     ntfy_client = NtfyClient(topic=topic)
     
 def notify(message):
