@@ -86,6 +86,11 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route('/test')
+def test():
+    from python_ntfy import NtfyClient
+    NtfyClient(os.getenv("NTFY_TOPIC")).send("Hello World!")
+
 @app.route('/')
 @login_required
 def home():
