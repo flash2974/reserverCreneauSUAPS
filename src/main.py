@@ -90,6 +90,7 @@ def logout():
 def test():
     from python_ntfy import NtfyClient
     NtfyClient(os.getenv("NTFY_TOPIC")).send("Hello World!")
+    return "message sent !"
 
 @app.route('/')
 @login_required
