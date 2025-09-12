@@ -6,3 +6,4 @@ schedule
 Flask
 Flask-Login
 gunicorn
+python_ntfy

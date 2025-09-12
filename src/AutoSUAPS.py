@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 import pandas as pd
@@ -5,6 +6,18 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from src.utilities import get_paris_datetime, read_id_list
+
+##### NTFY #####
+ntfy_client = None
+if topic := os.getenv("NTFY_TOPIC") :
+    from python_ntfy import NtfyClient
+    ntfy_client = NtfyClient(topic=topic)
+    
+
+def notify(message) :
+    if ntfy_client :
+        ntfy_client.send(message)
+    print(message)
 
 
 class AutoSUAPS :
@@ -198,21 +211,18 @@ class AutoSUAPS :
             creneau_id = row['id']
             places_restantes = row['places_restantes']
             
-        except IndexError:
-            print("Aucun créneau trouvé avec cet id")
-            
         except Exception as e:
-            print(f"Erreur d'accès: {e}")
+            notify(f"Erreur inconnue : {e}")
 
         else :
             if places_restantes > 0:
                 res = self.poster_requete(creneau_id, activity_id)
                 if res == 201:
-                    print(f"Inscription effectuée en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
+                    notify(f"Inscription effectuée en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
                 else:
-                    print(f"Erreur {res} d'inscription en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
+                    notify(f"Erreur {res} d'inscription en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
             else:
-                print(f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
+                notify(f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}")
             print()
 
 

@@ -3,7 +3,8 @@
 - [Bonjour !](#bonjour-)
 - [Fonctionnement](#fonctionnement)
   - [Ce que vous devez faire](#ce-que-vous-devez-faire)
-  - [Configuration HTTPS Avec Caddy (Optionnel)](#configuration-https-avec-caddy-optionnel)
+  - [Optionnel - Configuration HTTPS Avec Caddy](#optionnel---configuration-https-avec-caddy)
+  - [Optionnel - notifications](#optionnel---notifications)
 
 ---
 
@@ -38,7 +39,7 @@ Le code a bien évolué et il n'y a plus que peu de choses à faire à la main. 
 
 3. Lancer le programme avec Docker :
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
     Ensuite, vous aurez accès à la *WebUI*. Dans un navigateur, allez à l'adresse de votre serveur (IP ou nom de domaine) et mettez vous sur le port 5000. Il faut au préalabale que le port soit ouvert.
         - Si vous faites tourner en local : [**http://localhost:5000**](http://localhost:5000)
@@ -51,15 +52,13 @@ Le code a bien évolué et il n'y a plus que peu de choses à faire à la main. 
 
 **Pour mettre à jour le container :**
     ```bash
-    docker compose down && \
-    docker rmi reservercreneausuaps-app && \
-    git pull && \
+    git pull
     docker compose up -d --build
     ```
     
 <br>
 
-### Configuration HTTPS Avec Caddy (Optionnel)
+### Optionnel - Configuration HTTPS Avec Caddy
 1. Installer Caddy :
 ```bash
 sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
@@ -95,8 +94,6 @@ cat config/.env
 
 3. Relancez le container docker :
 ```bash
-docker compose down && \
-docker rmi reservercreneausuaps_app && \
 docker compose up -d --build
 ```
 
@@ -104,5 +101,12 @@ docker compose up -d --build
 ```
 https://{nom_de_domaine}/login?token={token}
 ```
+
+
+### Optionnel - notifications
+Si vous voulez avoir les notifcations de confirmation de réservation : 
+- Installez l'appli ntfy (sur le play store)
+- Choisissez un topic (un nom unique, car c'est public !)
+- Mettez ce topic dans le fichier .env
 
 Merci à [maxlttr](https://github.com/maxlttr1) pour son aide !
