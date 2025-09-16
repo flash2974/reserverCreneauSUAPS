@@ -63,8 +63,16 @@ def login():
             user = User("admin")
             login_user(user, remember=want_remember)
             return redirect(url_for("home"))
+        else :
+            flash("Mot de passe incorrect.", "error")
+            return render_template("login.html")
 
     return render_template("login.html")
+
+
+@app.route("/debug_headers")
+def debug_headers():
+    return dict(request.headers)
 
 
 @app.route("/logout")
@@ -78,7 +86,7 @@ def logout():
 def test():
     topic = os.getenv("NTFY_TOPIC")
     NtfyClient(topic).send("Hello World!")
-    return f"message sent on topic {topic}!"
+    return f"Message sent on topic {topic}!"
 
 
 @app.route("/")
@@ -93,7 +101,7 @@ def home():
             ),
             job.note,
         )
-        for job in schedule.jobs
+        for job in sorted(schedule.jobs, key=lambda job: job.next_run)
     ]
     sports = sorted(list({activity["activity_name"] for activity in activities_dict}))
 

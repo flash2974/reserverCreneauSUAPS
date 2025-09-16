@@ -100,8 +100,7 @@
                 </div>
             {% endif %}
         {% endwith %}
-    <footer>
-    </footer>
+    </main>
     <script>
         document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
@@ -170,13 +169,12 @@
             });
         });
 
-    function openPopup() {
-        document.getElementById("popup").style.display = "block";
-    }
-    function closePopup() {
-        document.getElementById("popup").style.display = "none";
-    }
+        function openPopup() {
+            document.getElementById("popup").style.display = "block";
+        }
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
     </script>
-    
 </body>
 </html>
