@@ -104,9 +104,11 @@ https://{nom_de_domaine}/login?token={token}
 
 
 ### Optionnel - notifications
-Si vous voulez avoir les notifcations de confirmation de réservation : 
-- Installez l'appli ntfy (sur le play store)
-- Choisissez un topic (un nom unique, car c'est public !)
-- Mettez ce topic dans le fichier .env
+Si vous voulez avoir les notifcations de confirmation de réservation (avec discord): 
+- Dans un serveur discord qui vous appartient, allez dans paramètres > intégrations > webhook
+- Créez une webhook et copiez son URL
+- Collez son URL dans le fichier .env
+- Si vous voulez être ping, rajoutez aussi l'ID de votre compte discord (pas obligatoire)
+- Une fois loggé dans l'app, allez sur la route /test, vous recevez une notification normalement
 
 Merci à [maxlttr](https://github.com/maxlttr1) pour son aide !

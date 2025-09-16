@@ -6,15 +6,16 @@ import schedule
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
-from python_ntfy import NtfyClient
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from src.AutoSUAPS import AutoSUAPS, notify
 from src.utilities import read_config, save_config, set_all_schedules
 
+if __name__ == "__main__" :
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../config/.env"), override=True)
+from src.AutoSUAPS import AutoSUAPS, notify  # noqa: E402
+
+
 # === ENV SETUP ===
-BASE_DIR = os.path.dirname(__file__)
-load_dotenv(dotenv_path=os.path.join(BASE_DIR, "../config/.env"), override=True)
 USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 TOKEN = os.getenv("TOKEN")

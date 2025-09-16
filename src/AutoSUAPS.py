@@ -20,7 +20,7 @@ def notify(message):
         data = {
             "content": f"{message}\n||<@{DISCORD_ID}>||" if DISCORD_ID else message,
             "username": "SUAPS - Daemon",
-            "avatar_url": "https://i.imgur.com/4M34hi2.png"
+            "avatar_url": "https://fantasytopics.com/wp-content/uploads/2022/07/james-bousema-balrog-final.jpg.webp"
         }
         requests.post(WEBHOOK_URL, data)
 
