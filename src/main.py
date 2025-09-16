@@ -9,7 +9,7 @@ from flask_login import LoginManager, UserMixin, login_required, login_user, log
 from python_ntfy import NtfyClient
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from src.AutoSUAPS import AutoSUAPS
+from src.AutoSUAPS import AutoSUAPS, notify
 from src.utilities import read_config, save_config, set_all_schedules
 
 # === ENV SETUP ===
@@ -84,9 +84,8 @@ def logout():
 @app.route("/test")
 @login_required
 def test():
-    topic = os.getenv("NTFY_TOPIC")
-    NtfyClient(topic).send("Hello World!")
-    return f"Message sent on topic {topic}!"
+    notify("Hello from `/test` !")
+    return "Message sent !"
 
 
 @app.route("/")

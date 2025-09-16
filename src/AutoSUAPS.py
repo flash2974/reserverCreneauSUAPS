@@ -8,18 +8,21 @@ import pytz
 import requests
 import schedule
 from bs4 import BeautifulSoup
-from python_ntfy import NtfyClient
 
 from src.utilities import get_paris_datetime, read_id_list
 
-##### NTFY #####
-ntfy_client = None
-if topic := os.getenv("NTFY_TOPIC") :
-    ntfy_client = NtfyClient(topic=topic)
-    
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+DISCORD_ID = os.getenv("DISCORD_ID")
+
+##### Discord Notif ##### 
 def notify(message):
-    if ntfy_client:
-        ntfy_client.send(message)
+    if WEBHOOK_URL :
+        data = {
+            "content": f"{message}\n||<@{DISCORD_ID}>||" if DISCORD_ID else message,
+            "username": "SUAPS - Daemon",
+            "avatar_url": "https://i.imgur.com/4M34hi2.png"
+        }
+        requests.post(WEBHOOK_URL, data)
 
 
 class AutoSUAPS :
