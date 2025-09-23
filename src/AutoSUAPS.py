@@ -53,10 +53,15 @@ class AutoSUAPS :
         login_data["username"] = self.username
         login_data["password"] = self.password
 
-        self.session.post(r.url, login_data)
-        
-        self.set_periode() 
+        res_code = self.session.post(r.url, login_data).status_code
 
+        if res_code in (201, 200) :
+            self.set_periode()
+        elif res_code == 401 :
+            raise Exception("Incorrect password")
+        else :
+            raise Exception(f"Error ! code {res_code}")
+        
     def get_etudiant(self) -> str :
         '''
         Retourne la data JSON de l'étudiant en question (de toi qui lis ce code)
