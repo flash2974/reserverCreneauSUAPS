@@ -237,11 +237,6 @@ class AutoSUAPS :
             else:
                 message = f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}"
             
-            next_job = min(schedule.jobs, key=lambda job: job.next_run, default=None)
-            if next_job and (next_run := next_job.next_run) :
-                note = getattr(next_job, 'note', '???')
-                message += f"\nProchaine exécution : {next_run.astimezone(pytz.timezone('Europe/Paris')).strftime('%d-%m-%Y %H:%M:%S')} ({note})"
-            
             notify(message)
     
 
