@@ -4,9 +4,7 @@ from datetime import datetime, timedelta
 from random import randint
 
 import pandas as pd
-import pytz
 import requests
-import schedule
 from bs4 import BeautifulSoup
 
 from src.utilities import get_paris_datetime, read_id_list
