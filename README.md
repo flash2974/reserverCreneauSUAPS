@@ -98,9 +98,22 @@ docker compose up -d --build
 ```
 
 4. Accédez directement au site via l'url suivante :
-```
+```bash
 https://{nom_de_domaine}/login?token={token}
 ```
+
+5. (Optionnel) Sécurité accrue - Firewall
+```bash
+sudo apt update
+sudo apt install ufw
+
+sudo ufw allow from 127.0.0.1 to any port 5000 # Port 5000 uniquement depuis localhost,
+sudo ufw deny 5000 # Les autres requêtes sur le port 5000 sont bloquées
+sudo ufw allow ssh # Sinon ça te déco de SSH !
+
+sudo ufw enable
+```
+
 
 
 ### Optionnel - notifications
