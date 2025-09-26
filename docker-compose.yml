@@ -6,6 +6,6 @@ services:
       - ./config/config.json:/app/config/config.json
     env_file:
       - ./config/.env
-    expose:
-      - "5000"
+    ports:
+      - 5000:5000
     restart: unless-stopped
