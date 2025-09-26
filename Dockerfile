@@ -12,4 +12,4 @@ EXPOSE 5000
 
 #CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:5000", "src.main:app"]
 # CMD ["python", "-m", "src.main"]
-CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then python -m src.main; else gunicorn -w 1 -b 127.0.0.1:5000 src.main:app; fi"]
+CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then python -m src.main; else gunicorn -w 1 -b 0.0.0.0:5000 src.main:app; fi"]
