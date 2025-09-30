@@ -3,6 +3,7 @@ import threading
 
 import pytz
 import schedule
+import time
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
@@ -167,7 +168,11 @@ def get_activities():
 def scheduler_loop():
     while True:
         schedule.run_pending()
-
+        next_run = schedule.get_next_run()
+        if next_run is None:
+            time.sleep(60)
+        elif next_run > 0:
+            time.sleep(next_run)
 
 # === MAIN ENTRY ===
 def start_scheduler():
