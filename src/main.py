@@ -168,11 +168,7 @@ def get_activities():
 def scheduler_loop():
     while True:
         schedule.run_pending()
-        next_run = schedule.get_next_run()
-        if next_run is None:
-            time.sleep(60)
-        elif next_run > 0:
-            time.sleep(next_run)
+        time.sleep(60)
 
 # === MAIN ENTRY ===
 def start_scheduler():
