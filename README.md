@@ -3,8 +3,6 @@
 - [Bonjour !](#bonjour-)
 - [Fonctionnement](#fonctionnement)
   - [Ce que vous devez faire](#ce-que-vous-devez-faire)
-  - [Optionnel - Configuration HTTPS Avec Caddy](#optionnel---configuration-https-avec-caddy)
-  - [Optionnel - notifications](#optionnel---notifications)
 
 ---
 
@@ -51,14 +49,16 @@ Le code a bien évolué et il n'y a plus que peu de choses à faire à la main. 
 <br>
 
 **Pour mettre à jour le container :**
-    ```bash
-    git pull
-    docker compose up -d --build
-    ```
+```bash
+git pull && docker compose up -d --build
+```
     
 <br>
 
-### Optionnel - Configuration HTTPS Avec Caddy
+
+<details>
+<summary>Optionnel - Configuration HTTPS Avec Caddy</summary>
+
 1. Installer Caddy :
 ```bash
 sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
@@ -102,7 +102,7 @@ docker compose up -d --build
 https://{nom_de_domaine}/login?token={token}
 ```
 
-5. (Optionnel) Sécurité accrue - Firewall
+5. Sécurité accrue - Firewall
 ```bash
 sudo apt update
 sudo apt install ufw
@@ -113,15 +113,18 @@ sudo ufw allow ssh # Sinon ça te déco de SSH !
 
 sudo ufw enable
 ```
+</details>
 
 
+<details>
+<summary>Optionnel - Notifications</summary>
 
-### Optionnel - notifications
 Si vous voulez avoir les notifcations de confirmation de réservation (avec discord): 
 - Dans un serveur discord qui vous appartient, allez dans paramètres > intégrations > webhook
 - Créez une webhook et copiez son URL
 - Collez son URL dans le fichier .env
 - Si vous voulez être ping, rajoutez aussi l'ID de votre compte discord (pas obligatoire)
 - Une fois loggé dans l'app, allez sur la route /test, vous recevez une notification normalement
+</details>
 
 Merci à [maxlttr](https://github.com/maxlttr1) pour son aide !

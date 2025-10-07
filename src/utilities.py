@@ -21,12 +21,29 @@ def get_paris_datetime() :
     return datetime.datetime.now(pytz.timezone('Europe/Paris'))
 
 
-def actions(auto, id) :
+def actions(auto, id : str) :
+    """
+    Se log au CAS et réserve un créneau.
+
+    Args:
+        auto (AutoSUAPS): Instance d'AutoSUAPS en cours.
+        id (str): ID du créneau à réserver.
+    """
     with auto :
         auto.reserver_creneau(id)
     
 
-def set_schedule(id, day, hour, name, auto):
+def set_schedule(id : str, day : str, hour : str, name : str, auto) :
+    """
+    Rajoute une tâche récurrence avec Schedule (pour réserver un créneau)
+
+    Args:
+        id (str): ID du créneau à réserver.
+        day (str): Jour : "lundi", "mardi", etc.
+        hour (str): Heure : "12:05:00" par ex.
+        name (str): Nom de l'activité : "Escalade", etc.
+        auto (AutoSUAPS): Instance d'AutoSUAPS en cours.
+    """
     match day:
         case "lundi":
             job = schedule.every().monday.at(hour, "Europe/Paris").do(actions, auto, id)
@@ -47,6 +64,11 @@ def set_schedule(id, day, hour, name, auto):
 
 
 def set_all_schedules(auto):
+    """Fixe toutes les schedules en fonction de la config (les créneaux qu'on veut réserver de manière récurrente).
+
+    Args:
+        auto (AutoSUAPS): Instance d'AutoSUAPS en cours.
+    """
     schedule.clear()
     
     allSchedules = auto.get_schedules()

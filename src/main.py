@@ -13,6 +13,7 @@ from src.utilities import read_config, save_config, set_all_schedules
 if __name__ == "__main__" :
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../config/.env"), override=True)
 from src.AutoSUAPS import AutoSUAPS, notify  # noqa: E402
+# Chargement de l'env avant du chargement d'AutoSUAPS -> ne pas modifier
 
 
 # === ENV SETUP ===
@@ -25,6 +26,7 @@ DEBUG = os.getenv("DEBUG") == "True"
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+# Cookie de session sécurisé sous HTTPS only + transmission headers sécurisés
 if not DEBUG :
     app.config["SESSION_COOKIE_SECURE"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"

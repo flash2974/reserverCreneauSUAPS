@@ -13,7 +13,14 @@ WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 DISCORD_ID = os.getenv("DISCORD_ID")
 
 ##### Discord Notif ##### 
-def notify(message):
+def notify(message : str) -> None :
+    """Notifie l'utilisateur du succès ou de l'échec de la réservation via WebHook Discord.
+    Si WEBHOOK_URL non précisé dans le fichier .env, ne fait rien.
+    Si l'ID Discord de l'utilisateur est précisé, ping cet utilisateur.
+
+    Args:
+        message (str): Message à envoyer.
+    """
     if WEBHOOK_URL :
         data = {
             "content": f"{message}\n||<@{DISCORD_ID}>||" if DISCORD_ID else message,
@@ -25,19 +32,24 @@ def notify(message):
 
 class AutoSUAPS :
     def __init__(self, username : str, password : str) -> None :
-        '''
-        Permet de gérer les réservations de créneaux pour le SUAPS<br>
-        Paramètres :
-        - `username` : identifiant de l'université
-        - `password` : mot de passe
-        '''
+        """
+        Permet de gérer les réservations de créneaux pour le SUAPS
+
+        Args:
+            username (str): Identifiant de l'université
+            password (str): Mot de passe
+        """
         self.username = username
         self.password = password
 
     def login(self) -> None :
-        '''
-        Permet de se connecter à son compte de l'université avec son username et password.
-        '''
+        """
+        Établit une session authentifiée avec le système CAS de l'université.
+        
+        Raises:
+            Exception: Si les identifiants sont incorrects (code 401)
+            Exception: Pour toute autre erreur de connexion
+        """
         self.session = requests.Session()
         r = self.session.get('https://cas6n.univ-nantes.fr/esup-cas-server/login?service=https%3A%2F%2Fu-sport.univ-nantes.fr%2Fcas%2F')
 
@@ -60,17 +72,27 @@ class AutoSUAPS :
         else :
             raise Exception(f"Error ! code {res_code}")
         
-    def get_etudiant(self) -> str :
-        '''
-        Retourne la data JSON de l'étudiant en question (de toi qui lis ce code)
-        '''
+    def get_etudiant(self) -> dict :
+        """
+        Récupère les infos de l'étudiant (JSON renvoyé par l'API du SUAPS)
+
+        Returns:
+            dict: Data de l'étudiant
+        """
         return self.session.get('https://u-sport.univ-nantes.fr/api/individus/me').json()
         
     
-    def get_creneau(self, id_creneau : str, id_activite : str) -> str | None:
-        '''
-        Retourne les data JSON d'un créneau à partir de son ID et de l'ID de l'activité
-        '''
+    def get_creneau(self, id_creneau : str, id_activite : str) -> dict | None:
+        """
+        Récupère les données JSON d'un créneau
+
+        Args:
+            id_creneau (str): ID du créneau dont on souhaite avoir les détails
+            id_activite (str): ID de l'activité dudit créneau
+
+        Returns:
+            dict: Data JSON du créneau en question
+        """
         URL = f'https://u-sport.univ-nantes.fr/api/extended/creneau-recurrents/semaine?idActivite={id_activite}&idPeriode={self.id_periode}&idIndividu={self.username}'
         rep = self.session.get(URL).json()
         
@@ -83,6 +105,9 @@ class AutoSUAPS :
         '''
         Fait une requête pour savoir quel catalogue utiliser, selon la date actuelle.
         Soit le catalogue régulier, soit les différents catalogues selon les dates de vacances.
+        
+        Returns:
+            str: ID du catalogue
         '''
         rep = self.session.get('https://u-sport.univ-nantes.fr/api/extended/periodes/catalogue?idCatalogue=')
         data = rep.json()
@@ -102,7 +127,10 @@ class AutoSUAPS :
                     
     def get_activites(self) -> list[str] :
         '''
-        Renvoie une liste contenant les IDs des activités de l'user (3 max)
+        Récupère les activités auxquelles est inscrit l'utilisateur connecté (3 max)
+        
+        Returns:
+            list[str] : liste contenant les IDs des activités de l'user 
         '''
         url_3sports = f'https://u-sport.univ-nantes.fr/api/extended/activites/individu/paiement?idIndividu={self.username}&typeIndividu={self.get_etudiant()["type"]}&idPeriode={self.id_periode}'
         rep = self.session.get(url_3sports).json()
@@ -114,9 +142,12 @@ class AutoSUAPS :
         return activities
     
     def get_info_activites(self) -> pd.DataFrame :
-        '''
-        Renvoie un dataframe avec toutes les infos sur les créneaux disponibles
-        '''
+        """
+        Récupère toutes les informations des créneaux (horaires, type de sport, localisation, etc)
+
+        Returns:
+            pd.DataFrame: Dataframe avec toutes les infos sur les créneaux disponibles
+        """
         activities_list = []
         ordered_days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
         liste_resa = self.get_creneaux_inscrit()
@@ -157,7 +188,10 @@ class AutoSUAPS :
     
     def get_schedules(self) -> list[dict]:
         '''
-        Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute un delta random pour savoir à quelles heures set les schedules
+        Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute un delta random pour savoir à quelles heures fixer les schedules.
+        
+        Returns:
+            list[dict]: Chaque dictionnaire représente un créneau à fixer, avec son ID, jour, heure, et un nom.
         '''
         liste_input = read_id_list()
         if (df := self.get_info_activites()).empty :
@@ -181,9 +215,12 @@ class AutoSUAPS :
         return res
     
     def get_creneaux_inscrit(self) -> list[str] :
-        '''
-        Renvoie les créneaux pour lesquels on est inscrit (créneaux à venir)
-        '''
+        """
+        Récupère les créneaux auxquels est inscrit l'utilisateur.
+
+        Returns:
+            list[str]: Liste des IDS desdits créneaux.
+        """
         rep = self.session.get('https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idIndividu=E24A014X').json()
         res = []
         dateAuj = get_paris_datetime()
@@ -200,7 +237,7 @@ class AutoSUAPS :
         
     def __str__(self) -> None :
         '''
-        Affiche le tableaux des activités disponibles, avec quelques informations
+        Affiche le tableaux des activités disponibles, avec quelques informations.
         '''
         if(df := self.get_info_activites()).empty :
             return "Aucune activité disponible."
@@ -210,11 +247,13 @@ class AutoSUAPS :
         
     
     def reserver_creneau(self, id_creneau: str) -> None:
-        '''
-        Réserve le créneau spécifié par son id
-        '''
+        """
+        Réserve le créneau spécifié par son id et notifie l'utilisateur (s'il le souhaite).
+
+        Args:
+            id_creneau (str): ID du créneau à réserver
+        """
         df = self.get_info_activites()
-        message = ""
 
         try:
             row = df.loc[df['id'] == id_creneau].iloc[0]
@@ -240,9 +279,16 @@ class AutoSUAPS :
 
 
     def poster_requete(self, id_creneau : str, id_activite : str) -> int :
-        '''
-        Envoie une requête POST pour réserver un créneau
-        '''
+        """
+        Envoie une requête POST pour réserver un créneau.
+
+        Args:
+            id_creneau (str): ID du créneau à réserver.
+            id_activite (str): ID de l'activité associée au créneau.
+
+        Returns:
+            int: Code de retour de la requête POST. Succès si 201.
+        """
         postURL = f'https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idPeriode={self.id_periode}'
 
         post_data = {
@@ -260,9 +306,7 @@ class AutoSUAPS :
         post_data["creneau"]["fileAttente"] = True
         post_data["creneau"]["actif"] = True
         
-        headers = {
-            'Content-Type': 'application/json'
-        }
+        headers = { 'Content-Type': 'application/json' }
         
         # Convertir les données en JSON
         post_data_json = json.dumps(post_data)
@@ -275,15 +319,21 @@ class AutoSUAPS :
     
     def logout(self) -> None : 
         '''
-        Ferme la session HTTP et donc déconnecte l'utilisateur
+        Ferme la session HTTP et donc déconnecte l'utilisateur.
         '''
         self.session.close()
         
         
     def __enter__(self):
+        """
+        Méthode d'entrée (quand on fait with AutoSUAPS ...).
+        """
         self.login()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """ 
+        Méthode de sortie (à la fin du bloc with AutoSUAPS ...).
+        """
         self.logout()
         return False
