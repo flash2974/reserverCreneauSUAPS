@@ -1,37 +1,18 @@
 import json
-import os
 from datetime import datetime, timedelta
 from random import randint
 
 import pandas as pd
 import requests
+import schedule
 from bs4 import BeautifulSoup
 
+from src.Notifier import Notifier
 from src.utilities import get_paris_datetime, read_id_list
-
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")
-DISCORD_ID = os.getenv("DISCORD_ID")
-
-##### Discord Notif ##### 
-def notify(message : str) -> None :
-    """Notifie l'utilisateur du succès ou de l'échec de la réservation via WebHook Discord.
-    Si WEBHOOK_URL non précisé dans le fichier .env, ne fait rien.
-    Si l'ID Discord de l'utilisateur est précisé, ping cet utilisateur.
-
-    Args:
-        message (str): Message à envoyer.
-    """
-    if WEBHOOK_URL :
-        data = {
-            "content": f"{message}\n||<@{DISCORD_ID}>||" if DISCORD_ID else message,
-            "username": "SUAPS - Daemon",
-            "avatar_url": "https://fantasytopics.com/wp-content/uploads/2022/07/james-bousema-balrog-final.jpg.webp"
-        }
-        requests.post(WEBHOOK_URL, data)
 
 
 class AutoSUAPS :
-    def __init__(self, username : str, password : str) -> None :
+    def __init__(self, username : str, password : str, notifier : Notifier = None) -> None :
         """
         Permet de gérer les réservations de créneaux pour le SUAPS
 
@@ -41,6 +22,7 @@ class AutoSUAPS :
         """
         self.username = username
         self.password = password
+        self.notifier = notifier
 
     def login(self) -> None :
         """
@@ -184,6 +166,12 @@ class AutoSUAPS :
             df.reset_index(inplace=True, drop=True)
             
         return df
+    
+    
+    def get_activities(self):
+        with self:
+            df = self.get_info_activites()
+            return df.to_dict(orient="records")
         
     
     def get_schedules(self) -> list[dict]:
@@ -274,7 +262,7 @@ class AutoSUAPS :
             else:
                 message = f"Pas de place en {row['activity_name']}, le {row['jour']} pour le créneau de {row['creneau_horaire']}"
             
-            notify(message)
+            self.notifier.notify(message)
     
 
 
@@ -337,3 +325,61 @@ class AutoSUAPS :
         """
         self.logout()
         return False
+    
+    
+    def actions(self, id : str) :
+        """
+        Se log au CAS et réserve un créneau.
+
+        Args:
+            id (str): ID du créneau à réserver.
+        """
+        with self : 
+            self.reserver_creneau(id)
+        
+
+    def set_schedule(self, id : str, day : str, hour : str, name : str) :
+        """
+        Rajoute une tâche récurrence avec Schedule (pour réserver un créneau)
+
+        Args:
+            id (str): ID du créneau à réserver.
+            day (str): Jour : "lundi", "mardi", etc.
+            hour (str): Heure : "12:05:00" par ex.
+            name (str): Nom de l'activité : "Escalade", etc.
+        """
+        match day:
+            case "lundi":
+                job = schedule.every().monday.at(hour, "Europe/Paris").do(self.actions, id)
+            case "mardi":
+                job = schedule.every().tuesday.at(hour, "Europe/Paris").do(self.actions, id)
+            case "mercredi":
+                job = schedule.every().wednesday.at(hour, "Europe/Paris").do(self.actions, id)
+            case "jeudi":
+                job = schedule.every().thursday.at(hour, "Europe/Paris").do(self.actions, id)
+            case "vendredi":
+                job = schedule.every().friday.at(hour, "Europe/Paris").do(self.actions, id)
+            case "samedi":
+                job = schedule.every().saturday.at(hour, "Europe/Paris").do(self.actions, id)
+            case "dimanche":
+                job = schedule.every().sunday.at(hour, "Europe/Paris").do(self.actions, id)
+        
+        job.note = name
+
+
+    def set_all_schedules(self):
+        """Fixe toutes les schedules en fonction de la config (les créneaux qu'on veut réserver de manière récurrente).
+        """
+        schedule.clear()
+        
+        allSchedules = self.get_schedules()
+        
+        if allSchedules is None :
+            return
+        
+        for creneau in allSchedules :
+            self.set_schedule(
+                id = creneau['id'], 
+                day = creneau['day'], 
+                hour = creneau['hour'], 
+                name = creneau['name'])
