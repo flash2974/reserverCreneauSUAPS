@@ -6,7 +6,6 @@ import threading
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import UserMixin, login_required, login_user, logout_user
 
-
 from src.utilities import read_config, save_config
 from src import login_manager, app
 from src import auto, notifier
