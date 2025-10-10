@@ -1,5 +1,3 @@
-
-
 import pytz
 import time
 import schedule
@@ -13,6 +11,7 @@ from src.utilities import read_config, save_config
 from src import login_manager, app
 from src import auto, notifier
 from src import PASSWORD, TOKEN, DEBUG
+
 
 # === FLASK AUTH ===
 class User(UserMixin):
@@ -43,7 +42,7 @@ def login():
             user = User("admin")
             login_user(user, remember=want_remember)
             return redirect(url_for("home"))
-        else :
+        else:
             flash("Mot de passe incorrect.", "error")
             return render_template("login.html")
 
@@ -138,7 +137,7 @@ def start_scheduler():
         while True:
             schedule.run_pending()
             time.sleep(60)
-        
+
     with auto:
         auto.set_all_schedules()
     threading.Thread(target=scheduler_loop, daemon=True).start()
