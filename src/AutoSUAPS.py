@@ -67,7 +67,7 @@ class AutoSUAPS:
             "https://u-sport.univ-nantes.fr/api/individus/me"
         ).json()
 
-    def get_creneau(self, id_creneau: str, id_activite: str) -> dict | None:
+    def get_creneau_info(self, id_creneau: str, id_activite: str) -> dict | None:
         """
         Récupère les données JSON d'un créneau
 
@@ -132,7 +132,7 @@ class AutoSUAPS:
 
         return activities
 
-    def get_info_activites(self) -> pd.DataFrame:
+    def get_all_creneaux(self) -> pd.DataFrame:
         """
         Récupère toutes les informations des créneaux (horaires, type de sport, localisation, etc)
 
@@ -193,11 +193,6 @@ class AutoSUAPS:
 
         return df
 
-    def get_activities(self):
-        with self:
-            df = self.get_info_activites()
-            return df.to_dict(orient="records")
-
     def get_schedules(self) -> list[dict]:
         """
         Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute un delta random pour savoir à quelles heures fixer les schedules.
@@ -206,7 +201,7 @@ class AutoSUAPS:
             list[dict]: Chaque dictionnaire représente un créneau à fixer, avec son ID, jour, heure, et un nom.
         """
         liste_input = read_id_list()
-        if (df := self.get_info_activites()).empty:
+        if (df := self.get_all_creneaux()).empty:
             return None
 
         filtered_rows = df[df["id"].isin(liste_input)]
@@ -256,7 +251,7 @@ class AutoSUAPS:
         """
         Affiche le tableaux des activités disponibles, avec quelques informations.
         """
-        if (df := self.get_info_activites()).empty:
+        if (df := self.get_all_creneaux()).empty:
             return "Aucune activité disponible."
         else:
             df = df.drop(["activity_id"], axis=1)
@@ -269,7 +264,7 @@ class AutoSUAPS:
         Args:
             id_creneau (str): ID du créneau à réserver
         """
-        df = self.get_info_activites()
+        df = self.get_all_creneaux()
 
         try:
             row = df.loc[df["id"] == id_creneau].iloc[0]
@@ -313,7 +308,7 @@ class AutoSUAPS:
             "dateReservation": datetime.now().isoformat(timespec="milliseconds") + "Z",
             "actif": False,
             "forcage": False,
-            "creneau": self.get_creneau(id_creneau, id_activite),
+            "creneau": self.get_creneau_info(id_creneau, id_activite),
             "individuDTO": self.get_etudiant(),
         }
 

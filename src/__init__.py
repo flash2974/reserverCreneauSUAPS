@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask
-from flask_login import LoginManager
+from flask_login import LoginManager, UserMixin
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from src.AutoSUAPS import AutoSUAPS
@@ -33,6 +33,17 @@ if not DEBUG:
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+class User(UserMixin):
+    def __init__(self, username):
+        self.username = username
+
+    def get_id(self):
+        return self.username
 
 notifier = Notifier(WEBHOOK_URL, DISCORD_ID)
 auto = AutoSUAPS(USERNAME, PASSWORD, notifier)

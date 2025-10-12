@@ -4,26 +4,11 @@ import schedule
 import threading
 
 from flask import flash, redirect, render_template, request, url_for
-from flask_login import UserMixin, login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user
 
 from src.utilities import read_config, save_config
-from src import login_manager, app
-from src import auto, notifier
+from src import app, auto, notifier, User
 from src import PASSWORD, TOKEN, DEBUG
-
-
-# === FLASK AUTH ===
-class User(UserMixin):
-    def __init__(self, username):
-        self.username = username
-
-    def get_id(self):
-        return self.username
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -48,11 +33,6 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/debug_headers")
-def debug_headers():
-    return dict(request.headers)
-
-
 @app.route("/logout")
 def logout():
     logout_user()
@@ -69,7 +49,8 @@ def test():
 @app.route("/")
 @login_required
 def home():
-    activities_dict = auto.get_activities()
+    with auto:
+        activities_dict = auto.get_all_creneaux().to_dict(orient="records")
     config_file = read_config()
     jobs = [
         (
