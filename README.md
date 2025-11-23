@@ -72,6 +72,9 @@ sudo systemctl restart caddy
 De cette manière, on accède au site directement via `https://mon-domaine.fr`.
 Ensuite, on peut accéder à la page principale sans passer par la login page.
 Pour ce faire :
+</details>
+<details>
+<summary>Optionnel - Accès via token</summary>
 
 1. Ajout du token au fichier `.env`
 ```bash
