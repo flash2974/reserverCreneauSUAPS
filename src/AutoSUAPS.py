@@ -231,7 +231,7 @@ class AutoSUAPS:
             list[str]: Liste des IDS desdits créneaux.
         """
         rep = self.session.get(
-            "https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idIndividu=E24A014X"
+            f"https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idIndividu={self.username}"
         ).json()
         res = []
         dateAuj = get_paris_datetime()
