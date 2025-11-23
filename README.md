@@ -1,12 +1,3 @@
-
-
-- [Bonjour !](#bonjour-)
-- [Fonctionnement](#fonctionnement)
-  - [Ce que vous devez faire](#ce-que-vous-devez-faire)
-
----
-
-
 ## Bonjour !
 Le SUAPS (service sports de Nantes Université) propose des créneaux horaires pour faire du sport, cependant ces créneaux sont très vite remplis.
 J'ai donc fait un petit programme qui permet de réserver des créneaux sans s'embêter à se connecter à son compte, etc.
