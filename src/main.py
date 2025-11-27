@@ -8,7 +8,7 @@ from flask_login import login_required, login_user, logout_user
 
 from src.utilities import read_config, save_config
 from src import app, auto, notifier, User
-from src import PASSWORD, TOKEN, DEBUG
+from src import PASSWORD, TOKEN, DEBUG, SLEEP_TIME
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -116,7 +116,7 @@ def start_scheduler():
     def scheduler_loop():
         while True:
             schedule.run_pending()
-            time.sleep(60)
+            time.sleep(SLEEP_TIME)
 
     with auto:
         auto.set_all_schedules()
