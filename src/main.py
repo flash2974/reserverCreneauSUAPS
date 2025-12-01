@@ -1,3 +1,5 @@
+import logging
+import os
 import pytz
 import time
 import schedule
@@ -9,6 +11,13 @@ from flask_login import login_required, login_user, logout_user
 from src.utilities import read_config, save_config
 from src import app, auto, notifier, User
 from src import PASSWORD, TOKEN, DEBUG, SLEEP_TIME
+
+# Configuration des logs
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -123,7 +132,11 @@ def start_scheduler():
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
 
-start_scheduler()
-
 if __name__ == "__main__":
+    # Évite de lancer le scheduler deux fois avec le reloader de Flask (mode debug)
+    if not DEBUG or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        start_scheduler()
     app.run(host="0.0.0.0", port=5000, debug=DEBUG)
+else:
+    # Mode production (Gunicorn)
+    start_scheduler()
