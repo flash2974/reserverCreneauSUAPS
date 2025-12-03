@@ -239,12 +239,9 @@ class AutoSUAPS:
         for creneau in rep:
             dateDebut = datetime.strptime(
                 creneau["occurenceCreneauDTO"]["debut"], "%Y-%m-%dT%H:%M:%SZ"
-            )
-            dateDebut = dateDebut.replace(tzinfo=dateAuj.tzinfo)
-
+            ).replace(tzinfo=dateAuj.tzinfo)
             if creneau["actif"] and dateAuj < dateDebut:
                 res.append(creneau["creneau"]["id"])
-
         return res
 
     def __str__(self) -> None:
