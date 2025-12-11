@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timedelta
 from random import randint
+import time
 
 import pandas as pd
 import requests
@@ -216,9 +217,7 @@ class AutoSUAPS:
                 row["creneau_horaire"].split(" - ")[1], "%H:%M"
             )
 
-            end_time_plus_delta = end_time + timedelta(seconds=randint(60, 180))
-            hour = end_time_plus_delta.strftime("%H:%M:%S")
-
+            hour = end_time.strftime("%H:%M:%S")
             res.append({"id": id, "day": day, "hour": hour, "name": name})
 
         return res
@@ -348,6 +347,7 @@ class AutoSUAPS:
         Args:
             id (str): ID du créneau à réserver.
         """
+        time.sleep(randint(60, 180))
         with self:
             self.reserver_creneau(id)
 
