@@ -3,10 +3,10 @@ name: Build and push the image
 on:
   push:
     branches:
-      - stable
+      - main
   pull_request:
     branches:
-      - stable
+      - main
   workflow_dispatch:
 
 permissions:
