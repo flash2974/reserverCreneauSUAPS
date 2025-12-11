@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from random import randint
 import time
 
@@ -343,6 +343,7 @@ class AutoSUAPS:
     def actions(self, id: str):
         """
         Se log au CAS et réserve un créneau.
+        Attend entre 60 et 180s de manière aléatoire
 
         Args:
             id (str): ID du créneau à réserver.
