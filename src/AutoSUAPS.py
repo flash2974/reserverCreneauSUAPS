@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from random import randint
 import time
+import logging
 
 import pandas as pd
 import requests
@@ -28,10 +29,6 @@ class AutoSUAPS:
     def login(self) -> None:
         """
         Établit une session authentifiée avec le système CAS de l'université.
-
-        Raises:
-            Exception: Si les identifiants sont incorrects (code 401)
-            Exception: Pour toute autre erreur de connexion
         """
         self.session = requests.Session()
         r = self.session.get(
@@ -53,9 +50,9 @@ class AutoSUAPS:
         if res_code in (201, 200):
             self.set_periode()
         elif res_code == 401:
-            raise Exception("Incorrect password")
+            logging.error("Incorrect password")
         else:
-            raise Exception(f"Error ! code {res_code}")
+            logging.error(f"Error ! code {res_code}")
 
     def get_etudiant(self) -> dict:
         """
