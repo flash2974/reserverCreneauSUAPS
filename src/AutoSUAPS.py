@@ -32,7 +32,7 @@ class AutoSUAPS:
         """
         self.session = requests.Session()
         r = self.session.get(
-            "https://cas6n.univ-nantes.fr/esup-cas-server/login?service=https%3A%2F%2Fu-sport.univ-nantes.fr%2Fcas%2F"
+            "https://login.univ-nantes.fr/cas25n/login?service=https%3A%2F%2Fu-sport.univ-nantes.fr%2Fcas%2F"
         )
 
         page_login = BeautifulSoup(r.text, "html.parser")
