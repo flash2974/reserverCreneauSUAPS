@@ -12,7 +12,7 @@ EXPOSE 5000
 
 HEALTHCHECK CMD python -c "import requests, sys; \
 try: \
-    r = requests.get('http://localhost:5000/health', timeout=5); \
+    r = requests.get('http://localhost:5000', timeout=5); \
     sys.exit(0 if r.status_code == 200 else 1); \
 except: sys.exit(1)"
 
