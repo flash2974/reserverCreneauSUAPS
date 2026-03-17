@@ -231,16 +231,19 @@ class AutoSUAPS:
         ).json()
         res = []
         dateAuj = get_paris_datetime()
-
+        
         for creneau in rep:
-            dateDebut = datetime.strptime(
-                creneau["occurenceCreneauDTO"]["debut"], "%Y-%m-%dT%H:%M:%SZ"
-            ).replace(tzinfo=dateAuj.tzinfo)
-            if creneau["actif"] and dateAuj < dateDebut:
-                res.append(creneau["creneau"]["id"])
+            try : 
+                dateDebut = datetime.strptime(
+                    creneau["occurenceCreneauDTO"]["debut"], "%Y-%m-%dT%H:%M:%SZ"
+                ).replace(tzinfo=dateAuj.tzinfo)
+                if creneau["actif"] and dateAuj < dateDebut:
+                    res.append(creneau["creneau"]["id"])
+            except Exception as e :
+                logging.error(f"{len(rep)=}\nREP[0]={rep[0] if len(rep) > 0 else ""}\nException:{e}")
         return res
 
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         """
         Affiche le tableaux des activités disponibles, avec quelques informations.
         """
@@ -421,3 +424,6 @@ class AutoSUAPS:
                 hour=creneau["hour"],
                 name=creneau["name"],
             )
+
+with AutoSUAPS("E24A014X", "Nathan2974") as a :
+    a.get_creneaux_inscrit()
