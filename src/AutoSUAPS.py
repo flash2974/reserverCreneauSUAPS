@@ -424,6 +424,3 @@ class AutoSUAPS:
                 hour=creneau["hour"],
                 name=creneau["name"],
             )
-
-with AutoSUAPS("E24A014X", "Nathan2974") as a :
-    a.get_creneaux_inscrit()
