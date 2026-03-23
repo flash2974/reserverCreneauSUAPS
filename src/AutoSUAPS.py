@@ -240,7 +240,7 @@ class AutoSUAPS:
                 if creneau["actif"] and dateAuj < dateDebut:
                     res.append(creneau["creneau"]["id"])
             except Exception as e :
-                logging.error(f"{len(rep)=}\nREP[0]={rep[0] if len(rep) > 0 else ""}\nException:{e}")
+                logging.error(f"REP={rep}\nException:{e}")
         return res
 
     def __str__(self) -> str:
