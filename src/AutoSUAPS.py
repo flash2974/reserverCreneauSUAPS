@@ -25,6 +25,7 @@ class AutoSUAPS:
         self.username = username
         self.password = password
         self.notifier = notifier
+            
 
     def login(self) -> None:
         """
@@ -219,7 +220,7 @@ class AutoSUAPS:
 
         return res
 
-    def get_creneaux_inscrit(self) -> list[str]:
+    def get_creneaux_inscrit(self, trys = 0) -> list[str]:
         """
         Récupère les créneaux auxquels est inscrit l'utilisateur.
 
@@ -229,7 +230,12 @@ class AutoSUAPS:
         rep = self.session.get(
             f"https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idIndividu={self.username}"
         )
-        if rep :
+        if rep.status_code == 401 :
+            if trys == 2 :
+                return []
+            self.login()
+            return self.get_creneaux_inscrit(trys+1)
+        else :
             try : 
                 rep = rep.json()
             except :
