@@ -62,9 +62,15 @@ class AutoSUAPS:
         Returns:
             dict: Data de l'étudiant
         """
-        return self.session.get(
+        rep = self.session.get(
             "https://u-sport.univ-nantes.fr/api/individus/me"
-        ).json()
+        )
+        if rep :
+            logging.debug("get etudiant", rep.status_code, rep.text)
+            try :
+                return rep.json()
+            except Exception as e :
+                logging.error(e)
 
     def get_creneau_info(self, id_creneau: str, id_activite: str) -> dict | None:
         """
@@ -85,7 +91,7 @@ class AutoSUAPS:
                 return creneau
         return None
 
-    def set_periode(self) -> str:
+    def set_periode(self) -> None:
         """
         Fait une requête pour savoir quel catalogue utiliser, selon la date actuelle.
         Soit le catalogue régulier, soit les différents catalogues selon les dates de vacances.
@@ -192,7 +198,7 @@ class AutoSUAPS:
 
         return df
 
-    def get_schedules(self) -> list[dict]:
+    def get_schedules(self) -> list[dict] | None:
         """
         Pour chaque activité de liste_input, récupère l'heure de fin du créneau et ajoute un delta random pour savoir à quelles heures fixer les schedules.
 
