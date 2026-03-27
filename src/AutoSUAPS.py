@@ -228,7 +228,13 @@ class AutoSUAPS:
         """
         rep = self.session.get(
             f"https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idIndividu={self.username}"
-        ).json()
+        )
+        if rep :
+            try : 
+                rep = rep.json()
+            except :
+                return []
+            
         res = []
         dateAuj = get_paris_datetime()
         
@@ -241,6 +247,7 @@ class AutoSUAPS:
                     res.append(creneau["creneau"]["id"])
             except Exception as e :
                 logging.error(f"REP={rep}\nException:{e}")
+                return []
         return res
 
     def __str__(self) -> str:
