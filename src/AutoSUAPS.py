@@ -66,7 +66,7 @@ class AutoSUAPS:
             "https://u-sport.univ-nantes.fr/api/individus/me"
         )
         if rep :
-            logging.debug("get etudiant", rep.status_code, rep.text)
+            logging.info("get etudiant", rep.status_code, rep.text)
             try :
                 return rep.json()
             except Exception as e :
