@@ -1,8 +1,8 @@
 import json
+import logging
+import time
 from datetime import datetime
 from random import randint
-import time
-import logging
 
 import pandas as pd
 import requests
@@ -25,7 +25,6 @@ class AutoSUAPS:
         self.username = username
         self.password = password
         self.notifier = notifier
-            
 
     def login(self) -> None:
         """
@@ -33,7 +32,7 @@ class AutoSUAPS:
         """
         self.session = requests.Session()
         r = self.session.get(
-            "https://login.univ-nantes.fr/cas25n/login?service=https%3A%2F%2Fu-sport.univ-nantes.fr%2Fcas%2F"
+            "https://login.univ-nantes.fr/cas26m/login?service=https%3A%2F%2Fu-sport.univ-nantes.fr%2Fcas%2F"
         )
 
         page_login = BeautifulSoup(r.text, "html.parser")
@@ -62,14 +61,11 @@ class AutoSUAPS:
         Returns:
             dict: Data de l'étudiant
         """
-        rep = self.session.get(
-            "https://u-sport.univ-nantes.fr/api/individus/me"
-        )
-        if rep :
-            logging.info("get etudiant", rep.status_code, rep.text)
-            try :
+        rep = self.session.get("https://u-sport.univ-nantes.fr/api/individus/me")
+        if rep:
+            try:
                 return rep.json()
-            except Exception as e :
+            except Exception as e:
                 logging.error(e)
 
     def get_creneau_info(self, id_creneau: str, id_activite: str) -> dict | None:
@@ -226,7 +222,7 @@ class AutoSUAPS:
 
         return res
 
-    def get_creneaux_inscrit(self, trys = 0) -> list[str]:
+    def get_creneaux_inscrit(self, trys=0) -> list[str]:
         """
         Récupère les créneaux auxquels est inscrit l'utilisateur.
 
@@ -236,28 +232,28 @@ class AutoSUAPS:
         rep = self.session.get(
             f"https://u-sport.univ-nantes.fr/api/extended/reservation-creneaux?idIndividu={self.username}"
         )
-        if rep.status_code == 401 :
-            if trys == 2 :
+        if rep.status_code == 401:
+            if trys == 2:
                 return []
             self.login()
-            return self.get_creneaux_inscrit(trys+1)
-        else :
-            try : 
+            return self.get_creneaux_inscrit(trys + 1)
+        else:
+            try:
                 rep = rep.json()
-            except :
+            except:
                 return []
-            
+
         res = []
         dateAuj = get_paris_datetime()
-        
+
         for creneau in rep:
-            try : 
+            try:
                 dateDebut = datetime.strptime(
                     creneau["occurenceCreneauDTO"]["debut"], "%Y-%m-%dT%H:%M:%SZ"
                 ).replace(tzinfo=dateAuj.tzinfo)
                 if creneau["actif"] and dateAuj < dateDebut:
                     res.append(creneau["creneau"]["id"])
-            except Exception as e :
+            except Exception as e:
                 logging.error(f"REP={rep}\nException:{e}")
                 return []
         return res

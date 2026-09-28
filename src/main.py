@@ -1,16 +1,15 @@
 import logging
 import os
-import pytz
-import time
-import schedule
 import threading
+import time
 
+import pytz
+import schedule
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
 
+from src import DEBUG, PASSWORD, SLEEP_TIME, TOKEN, User, app, auto, notifier
 from src.utilities import read_config, save_config
-from src import app, auto, notifier, User
-from src import PASSWORD, TOKEN, DEBUG, SLEEP_TIME
 
 # Configuration des logs
 logging.basicConfig(
@@ -97,7 +96,7 @@ def reserver():
 
     print(f"Réservation effectuée pour l'activité ID : {activity_id}")
     flash("Réservation effectuée !", "success")
-    return url_for("home")
+    return redirect(url_for("home"))
 
 
 @app.route("/update", methods=["POST"])
@@ -132,11 +131,8 @@ def start_scheduler():
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
 
-if __name__ == "__main__":
-    # Évite de lancer le scheduler deux fois avec le reloader de Flask (mode debug)
-    if not DEBUG or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        start_scheduler()
-    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
-else:
-    # Mode production (Gunicorn)
+if not DEBUG or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     start_scheduler()
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG)

@@ -1,7 +1,8 @@
-import os
-import pytz
-import json
 import datetime
+import json
+import os
+
+import pytz
 
 JSON_FILE = os.path.join(os.path.dirname(__file__), "../config/config.json")
 

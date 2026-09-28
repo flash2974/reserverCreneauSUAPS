@@ -1,9 +1,0 @@
-requests
-beautifulsoup4
-pandas
-python-dotenv
-schedule
-Flask
-Flask-Login
-gunicorn
-pytz

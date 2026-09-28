@@ -19,7 +19,7 @@ TOKEN = os.getenv("TOKEN")
 DEBUG = os.getenv("DEBUG") == "True"
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 DISCORD_ID = os.getenv("DISCORD_ID")
-SLEEP_TIME = int(os.getenv("SLEEP_TIME", 60)) # en secondes
+SLEEP_TIME = int(os.getenv("SLEEP_TIME", 60))  # en secondes
 
 # === FLASK APP SETUP ===
 app = Flask(__name__)
@@ -35,9 +35,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
+
 
 class User(UserMixin):
     def __init__(self, username):
@@ -45,6 +47,7 @@ class User(UserMixin):
 
     def get_id(self):
         return self.username
+
 
 notifier = Notifier(WEBHOOK_URL, DISCORD_ID)
 auto = AutoSUAPS(USERNAME, PASSWORD, notifier)

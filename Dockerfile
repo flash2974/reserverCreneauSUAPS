@@ -1,15 +1,12 @@
-FROM python:3.12-slim
-RUN pip install uv
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
 
-COPY config/requirements.txt .
-
-RUN uv pip install --system -r requirements.txt
-
-COPY . /app
 WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+
+COPY . .
 
 EXPOSE 5000
 
-#CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:5000", "src.main:app"]
-# CMD ["python", "-m", "src.main"]
-CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then python -m src.main; else gunicorn -w 1 --worker-class gthread --threads 4 --timeout 60 -b 0.0.0.0:5000 src.main:app; fi"]
+CMD ["sh", "-c", "if [ \"$DEBUG\" = \"True\" ]; then uv run python -m src.main; else uv run gunicorn -w 1 --threads 4 --timeout 60 -b 0.0.0.0:5000 src.main:app; fi"]
