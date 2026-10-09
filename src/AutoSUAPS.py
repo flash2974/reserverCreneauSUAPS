@@ -3,9 +3,6 @@ import logging
 import time
 from datetime import datetime
 from random import randint
-import time
-import logging
-from urllib.parse import urljoin
 
 import pandas as pd
 import requests
@@ -39,26 +36,16 @@ class AutoSUAPS:
         )
 
         page_login = BeautifulSoup(r.text, "html.parser")
-        login_form = page_login.find("form", id="fm1") or page_login.find("form")
-        if login_form is None:
-            logging.error("Unable to find the CAS login form at %s", r.url)
-            return
-
-        inputs: list = login_form.find_all("input")
+        inputs: list = page_login.find(id="fm1").find_all("input")
 
         login_data = {}
         for dico_input in inputs:
-            name = dico_input.attrs.get("name")
-            if name is None:
-                continue
             if dico_input.attrs.get("value") is not None:
-                login_data[name] = dico_input["value"]
+                login_data[dico_input["name"]] = dico_input["value"]
         login_data["username"] = self.username
         login_data["password"] = self.password
 
-        post_url = urljoin(r.url, login_form.get("action") or r.url)
-        res = self.session.post(post_url, data=login_data)
-        res_code = res.status_code
+        res_code = self.session.post(r.url, login_data).status_code
 
         if res_code in (201, 200):
             self.set_periode()

@@ -126,12 +126,8 @@ def start_scheduler():
             schedule.run_pending()
             time.sleep(SLEEP_TIME)
 
-    try:
-        with auto:
-            auto.set_all_schedules()
-    except Exception:
-        logging.exception("Unable to initialize the reservation scheduler")
-        return
+    with auto:
+        auto.set_all_schedules()
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
 
