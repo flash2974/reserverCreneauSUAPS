@@ -19,7 +19,9 @@ TOKEN = os.getenv("TOKEN")
 DEBUG = os.getenv("DEBUG") == "True"
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 DISCORD_ID = os.getenv("DISCORD_ID")
-SLEEP_TIME = int(os.getenv("SLEEP_TIME", 60))  # en secondes
+GOTIFY_URL = os.getenv("GOTIFY_URL")
+GOTIFY_TOKEN = os.getenv("GOTIFY_TOKEN")
+SLEEP_TIME = int(os.getenv("SLEEP_TIME", 60)) # en secondes
 
 # === FLASK APP SETUP ===
 app = Flask(__name__)
@@ -48,6 +50,5 @@ class User(UserMixin):
     def get_id(self):
         return self.username
 
-
-notifier = Notifier(WEBHOOK_URL, DISCORD_ID)
+notifier = Notifier(WEBHOOK_URL, DISCORD_ID, GOTIFY_URL, GOTIFY_TOKEN)
 auto = AutoSUAPS(USERNAME, PASSWORD, notifier)
